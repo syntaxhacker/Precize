@@ -21,6 +21,7 @@ from typing import Literal
 
 from .config import Config
 from .llm import LLMClient, Message, LLMResponse
+from .prompts import orchestrator as orch_prompts
 
 
 # ========== TOOLS ==========
@@ -56,38 +57,9 @@ class GenerateTool:
         Returns:
             Generated markdown content
         """
-        requirements = []
-        if include_mermaid:
-            requirements.append("- Include at least one mermaid diagram")
-        if include_table:
-            requirements.append("- Include a comparison/summary table")
-        if include_examples:
-            requirements.append("- Include 2-3 concrete code examples")
-
-        req_text = "\n".join(requirements) if requirements else "Standard educational content"
-
-        prompt = f"""Generate a section for a technical tutorial.
-
-**Overall Topic**: {topic}
-
-**This Section**: {section_title}
-
-**Description**: {description}
-
-**Previous Context** (what came before):
-{context[-500:] if len(context) > 500 else context}
-
-**Requirements**:
-{req_text}
-
-**Content Guidelines**:
-- Aim for 100-200 lines
-- Clear explanations
-- Progressive complexity
-- Real-world examples
-
-Respond ONLY with the markdown content. Start with the section heading.
-"""
+        prompt = orch_prompts.build_generate_section_prompt(
+            topic, section_title, description, context, include_mermaid, include_table, include_examples
+        )
 
         messages = [
             Message(
@@ -154,30 +126,7 @@ class ReviewTool:
         Returns:
             Dict with passed, issues, suggestions
         """
-        prompt = f"""Review this tutorial section.
-
-**Section**: {title}
-
-**Content**:
-```
-{content[:2000]}
-```
-
-Check for:
-1. Sufficient examples (at least 2)
-2. Clear explanations
-3. Missing diagrams/tables if needed
-4. Adequate length (100+ lines)
-
-Response JSON:
-```json
-{{
-  "passed": true/false,
-  "issues": ["issue1", "issue2"],
-  "suggestions": ["suggestion1"]
-}}
-```
-"""
+        prompt = orch_prompts.build_review_prompt(content, title)
 
         messages = [
             Message(role="system", content="You are a technical content reviewer."),
@@ -221,21 +170,7 @@ class ImproveTool:
         issues = "\n".join(f"- {i}" for i in feedback.get("issues", []))
         suggestions = "\n".join(f"- {s}" for s in feedback.get("suggestions", []))
 
-        prompt = f"""Improve this tutorial section.
-
-**Original**:
-```
-{content[:3000]}
-```
-
-**Issues to Fix**:
-{issues}
-
-**Suggestions**:
-{suggestions}
-
-Rewrite to address all issues. Respond ONLY with improved markdown.
-"""
+        prompt = orch_prompts.build_improve_prompt(content, issues, suggestions)
 
         messages = [
             Message(role="system", content="You improve technical content."),
@@ -351,27 +286,7 @@ class DocumentOrchestrator:
 
         Uses LLM to generate a detailed outline, then converts to tasks.
         """
-        prompt = f"""Create a detailed outline for a {target_lines}-line tutorial on: {topic}
-
-Return JSON with sections:
-```json
-{{
-  "title": "{topic}",
-  "sections": [
-    {{
-      "title": "Section Title",
-      "level": 1,
-      "description": "What this covers",
-      "require_mermaid": false,
-      "require_table": false,
-      "require_examples": true
-    }}
-  ]
-}}
-```
-
-Make 15-30 sections. Each section should be 100-200 lines when written.
-"""
+        prompt = orch_prompts.build_create_outline_prompt(topic, target_lines)
 
         response = self.llm.complete(
             [Message(role="user", content=prompt)],
