@@ -22,6 +22,7 @@ Welcome to the Preciz documentation. Preciz is a precise file editing agent with
 ### Advanced
 - [Orchestrator Pattern](orchestrator.md)
 - [Extending Preciz](extending.md)
+- [Logging](logging.md)
 - [Troubleshooting](troubleshooting.md)
 
 ## Quick Links

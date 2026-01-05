@@ -81,19 +81,73 @@ preciz-gen-long <topic> <output_file> [options]
 |--------|-------------|---------|
 | `--lines <n>` | Target line count | 10000 |
 | `--iter <n>` | Max review iterations per block | 2 |
+| `--gen-mode <mode>` | Generation mode (auto, llm, parts, custom) | auto |
+| `--parts <n>` | Number of parts for 'parts' mode (overrides auto-calc) | auto |
+
+### Generation Modes
+
+The CLI supports 4 generation modes for creating the outline:
+
+| Mode | Description | Reliability | When to Use |
+|------|-------------|-------------|-------------|
+| `auto` | Try LLM outline, fallback to parts | Good | Default - best balance |
+| `llm` | Use LLM to create detailed outline | Variable* | Best quality with good models |
+| `parts` | Simple numbered parts | Excellent | When LLM outline fails |
+| `custom` | Load sections from JSON file | Perfect | Full control over structure |
+
+*LLM mode reliability depends on your model. Free models may generate invalid JSON.
 
 ### Examples
 
 ```bash
-# 10,000 lines (default)
+# Auto mode (default) - tries LLM, falls back to parts
 preciz-gen-long "Machine Learning" ml.md
 
-# 5,000 lines
-preciz-gen-long "Docker Basics" docker.md --lines 5000
+# LLM mode - best quality if you have a good model
+preciz-gen-long "Docker Basics" docker.md --lines 5000 --gen-mode llm
 
-# 20,000 lines with more review
-preciz-gen-long "React" react.md --lines 20000 --iter 3
+# Parts mode - most reliable, simple numbered sections
+preciz-gen-long "React" react.md --lines 20000 --gen-mode parts
+
+# Parts mode with explicit number of parts
+preciz-gen-long "React" react.md --gen-mode parts --parts 25
+
+# Custom mode - use your own section structure
+preciz-gen-long "Python" python.md --gen-mode custom sections.json
+
+# Combine with other options
+preciz-gen-long "ML Advanced" ml.md --lines 50000 --iter 3 --gen-mode parts --parts 50
 ```
+
+### Custom Sections File
+
+For `--gen-mode custom`, create a JSON file with your sections:
+
+```json
+{
+  "title": "Python Programming Tutorial",
+  "sections": [
+    {
+      "title": "Introduction to Python",
+      "level": 1,
+      "description": "Overview, history, and why learn Python",
+      "require_mermaid": true,
+      "require_table": true,
+      "require_examples": true
+    },
+    {
+      "title": "Variables and Data Types",
+      "level": 1,
+      "description": "Numbers, strings, booleans, and type conversion",
+      "require_mermaid": false,
+      "require_table": true,
+      "require_examples": true
+    }
+  ]
+}
+```
+
+See `sections_example.json` in the project root for a complete example.
 
 ## Python API
 

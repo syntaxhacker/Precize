@@ -78,7 +78,7 @@ preciz-gen-long <topic> <output_file> [options]
 
 ### Description
 
-Creates a detailed outline, then generates each section using the orchestrator pattern.
+Creates a detailed outline, then generates each section using the orchestrator pattern. The CLI uses `DocumentOrchestrator` (NOT `BlockContentGenerator`).
 
 ### Options
 
@@ -86,23 +86,70 @@ Creates a detailed outline, then generates each section using the orchestrator p
 |--------|-------------|---------|
 | `--lines <n>` | Target line count | 10000 |
 | `--iter <n>` | Max review iterations per block | 2 |
+| `--gen-mode <mode>` | Generation mode (auto, llm, parts, custom) | auto |
+| `--parts <n>` | Number of parts for 'parts' mode (overrides auto-calc) | auto |
 | `-h, --help` | Show help message | |
+
+### Generation Modes
+
+| Mode | Description | When to Use |
+|------|-------------|-------------|
+| `auto` | Try LLM outline, fall back to parts if it fails | Default - best balance |
+| `llm` | Use LLM to create detailed outline | When you want best quality and have a good model |
+| `parts` | Simple numbered parts | Most reliable - when LLM outline fails |
+| `custom` | Load sections from JSON file | When you want full control over structure |
 
 ### Examples
 
 ```bash
-# Basic usage
+# Basic usage (auto mode)
 preciz-gen-long "Differential Calculus" calculus.md
 
-# Custom length
-preciz-gen-long "Python Basics" python.md --lines 5000
+# Custom length with LLM mode
+preciz-gen-long "Python Basics" python.md --lines 5000 --gen-mode llm
+
+# Parts mode with automatic calculation
+preciz-gen-long "React" react.md --lines 15000 --gen-mode parts
+
+# Parts mode with explicit number of parts
+preciz-gen-long "React" react.md --gen-mode parts --parts 20
+
+# Custom mode with JSON file
+preciz-gen-long "ML Basics" ml.md --gen-mode custom my_sections.json
 
 # More iterations (higher quality)
-preciz-gen-long "React" react.md --lines 15000 --iter 3
-
-# Very long document
-preciz-gen-long "Machine Learning" ml.md --lines 50000
+preciz-gen-long "Machine Learning" ml.md --lines 50000 --iter 3
 ```
+
+### Custom Sections File Format
+
+For `--gen-mode custom`, create a JSON file:
+
+```json
+{
+  "title": "Document Title",
+  "sections": [
+    {
+      "title": "Introduction",
+      "level": 1,
+      "description": "Overview and history",
+      "require_mermaid": true,
+      "require_table": false,
+      "require_examples": true
+    },
+    {
+      "title": "Getting Started",
+      "level": 1,
+      "description": "Installation and setup",
+      "require_mermaid": false,
+      "require_table": true,
+      "require_examples": true
+    }
+  ]
+}
+```
+
+See `sections_example.json` for a complete example.
 
 ### Output
 

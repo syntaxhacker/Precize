@@ -1,0 +1,45 @@
+{
+  "title": "Python Programming Tutorial",
+  "sections": [
+    {
+      "title": "Introduction to Python",
+      "level": 1,
+      "description": "Overview, history, and why learn Python",
+      "require_mermaid": true,
+      "require_table": true,
+      "require_examples": true
+    },
+    {
+      "title": "Variables and Data Types",
+      "level": 1,
+      "description": "Numbers, strings, booleans, and type conversion",
+      "require_mermaid": false,
+      "require_table": true,
+      "require_examples": true
+    },
+    {
+      "title": "Control Flow",
+      "level": 1,
+      "description": "If statements, loops, and logical operators",
+      "require_mermaid": true,
+      "require_table": false,
+      "require_examples": true
+    },
+    {
+      "title": "Functions",
+      "level": 1,
+      "description": "Defining functions, parameters, return values",
+      "require_mermaid": false,
+      "require_table": false,
+      "require_examples": true
+    },
+    {
+      "title": "Working with Lists",
+      "level": 1,
+      "description": "List methods, slicing, and comprehensions",
+      "require_mermaid": false,
+      "require_table": true,
+      "require_examples": true
+    }
+  ]
+}

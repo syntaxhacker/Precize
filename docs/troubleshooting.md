@@ -354,6 +354,23 @@ pip cache purge
 
 ## Debugging
 
+### Check Session Logs
+
+Every CLI session automatically creates a detailed log file:
+
+```bash
+# View the latest log
+cat logs/preciz-latest.log
+
+# Search for errors
+grep "ERROR" logs/preciz-latest.log
+
+# View LLM requests/responses
+grep "LLM REQUEST" -A 20 logs/preciz-latest.log
+```
+
+See [Logging](logging.md) for complete documentation.
+
 ### Enable Verbose Logging
 
 ```python

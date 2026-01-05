@@ -4,15 +4,17 @@ Reference for Preciz tools in the orchestrator.
 
 ## Overview
 
-The orchestrator uses four specialized tools:
+The CLI uses `DocumentOrchestrator` from `orchestrator.py`, which coordinates four specialized tools:
 
 ```
-DocumentOrchestrator
+DocumentOrchestrator (used by CLI)
     ├── GenerateTool  → Create content blocks
     ├── ReviewTool    → Check quality
     ├── ImproveTool   → Fix issues
     └── AppendTool    → Write to file
 ```
+
+**Note:** The older `BlockContentGenerator` from `generator_v2.py` is **not** used by the current CLI. The CLI (`generate_cli.py`) uses `DocumentOrchestrator` exclusively.
 
 ## GenerateTool
 
