@@ -135,7 +135,7 @@ def main() -> int:
                 print(f"  ✗ Failed: {error}")
         else:
             # With LLM fix retries
-            success, _ = convert_mermaid_with_retry(
+            success, _, error = convert_mermaid_with_retry(
                 mermaid_code=block.code,
                 output_path=output_path,
                 context=f"Diagram {block.index}",
@@ -152,6 +152,8 @@ def main() -> int:
             else:
                 failed_count += 1
                 print(f"  ✗ Failed to convert after 3 attempts")
+                if error:
+                    print(f"     Error: {error[:150]}...")
 
         print()
 

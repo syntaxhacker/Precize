@@ -448,14 +448,19 @@ flowchart LR
 - **CONTEXT**: Create diagrams that directly relate to the topic with clear, context-specific labels
 
 **CRITICAL DIAGRAM SYNTAX RULES:**
-1. **NEVER use curly braces {{}} in edge labels** - This causes parse errors
+1. **NEVER use reserved keywords** as classDef names or node IDs
+   - FORBIDDEN: end, start, subgraph, style, link, classDef, class
+   - Use: final, begin, group, styling, connector, styleDef, category
+   - WRONG: classDef end ... class A end
+   - RIGHT: classDef final ... class A final
+2. **NEVER use curly braces {{}} in edge labels** - This causes parse errors
    - WRONG: A -->|Props: {{className}}| B
    - RIGHT: A -->|"Props: className"| B (use quotes) or A -->|Props className| B (remove braces)
-2. **EVERY classDef must have complete style definitions**
+3. **EVERY classDef must have complete style definitions**
    - WRONG: classDef child
    - RIGHT: classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
-3. **Quote labels with special characters** (spaces, colons, etc.)
-4. **No undefined classes** - Every class in class statements must have a classDef
+4. **Quote labels with special characters** (spaces, colons, etc.)
+5. **No undefined classes** - Every class in class statements must have a classDef
 """)
 
     # Table examples
