@@ -453,14 +453,18 @@ flowchart LR
    - Use: final, begin, group, styling, connector, styleDef, category
    - WRONG: classDef end ... class A end
    - RIGHT: classDef final ... class A final
-2. **NEVER use curly braces {{}} in edge labels** - This causes parse errors
-   - WRONG: A -->|Props: {{className}}| B
-   - RIGHT: A -->|"Props: className"| B (use quotes) or A -->|Props className| B (remove braces)
-3. **EVERY classDef must have complete style definitions**
+2. **NEVER use forbidden characters in edge labels** - All cause parse errors:
+   - NO curly braces: {{}} - Use quotes or remove
+   - NO square brackets: [] - Use "empty array" or similar words
+   - NO HTML tags: <br/> <strong> etc - Use plain text only
+   - WRONG: A -->|Props: {{name}}| B or B -->|Array: []| C
+   - RIGHT: A -->|"Props name"| B or B -->|Empty array| C
+3. **ALWAYS use horizontal layout LR, never TD** - Use flowchart LR or graph LR
+4. **EVERY classDef must have complete style definitions**
    - WRONG: classDef child
    - RIGHT: classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
-4. **Quote labels with special characters** (spaces, colons, etc.)
-5. **No undefined classes** - Every class in class statements must have a classDef
+5. **Quote labels with special characters** (spaces, colons, etc.)
+6. **No undefined classes** - Every class in class statements must have a classDef
 """)
 
     # Table examples

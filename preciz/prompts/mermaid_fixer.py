@@ -29,18 +29,24 @@ def build_fix_mermaid_prompt(original_code: str, error: str, context: str) -> st
 1. **CRITICAL: Reserved keywords** - NEVER use these as classDef names or node IDs
    - FORBIDDEN: end, start, subgraph, end, style, link, classDef, class
    - Use alternatives: final, begin, group, finish, styling, connector, styleDef, category
-2. **CRITICAL: Curly braces {{}} in edge labels** - Edge labels containing curly braces MUST be quoted
-   - WRONG: A -->|Props: {{name}}| B
-   - RIGHT: A -->|"Props: name"| B or A -->|Props name| B
+2. **CRITICAL: Special characters in edge labels** - These cause parse errors:
+   - NO curly braces: {{}} - Use quotes or remove
+   - NO square brackets: [] - Use words like "empty array" instead
+   - NO HTML tags: <br/> <strong> etc - Use plain text
+   - WRONG: A -->|Props: {{name}}| B or B -->|Array: []| C
+   - RIGHT: A -->|"Props name"| B or B -->|Empty array| C
 3. **CRITICAL: Incomplete classDef** - Every classDef must have style definitions
    - WRONG: classDef child
    - RIGHT: classDef child fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
-4. Missing semicolons after statements (in sequenceDiagram)
-5. Incorrect syntax (flowchart vs graph vs sequenceDiagram)
-6. Invalid node IDs (use alphanumeric and underscores only, no spaces)
-7. Missing quotes around labels with special characters
-8. Unclosed brackets or parentheses
-9. Double curly braces in init (use {{{{ and }}}} for escaping)
+4. **CRITICAL: Wrong layout** - Always use horizontal LR, never TD
+   - WRONG: flowchart TD
+   - RIGHT: flowchart LR
+5. Missing semicolons after statements (in sequenceDiagram)
+6. Incorrect syntax (flowchart vs graph vs sequenceDiagram)
+7. Invalid node IDs (use alphanumeric and underscores only, no spaces)
+8. Missing quotes around labels with special characters
+9. Unclosed brackets or parentheses
+10. Double curly braces in init (use {{{{ and }}}} for escaping)
 
 **Mermaid Style Requirements:**
 - Use horizontal layout: flowchart LR or graph LR
