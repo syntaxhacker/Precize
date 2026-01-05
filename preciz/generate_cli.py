@@ -528,6 +528,35 @@ def main() -> int:
                 logger.info(f"  → Appended (total: {total_lines} lines)")
                 logger.info("")
 
+            # Post-generation validation: check for incomplete sections
+            logger.info(f"{'='*60}")
+            logger.info(f"  VALIDATING OUTPUT")
+            logger.info(f"{'='*60}")
+            logger.info("")
+
+            from .completion_checker import detect_incomplete_sections, print_incomplete_report
+
+            final_content = Path(output).read_text()
+            issues = detect_incomplete_sections(final_content)
+
+            if issues:
+                logger.warning(f"⚠️  Found {len(issues)} incomplete section(s)!")
+                print_incomplete_report(issues)
+
+                # Ask user if they want to regenerate
+                try:
+                    response = input("\nRegenerate incomplete sections? [Y/n]: ").strip().lower()
+                    if response not in ('n', 'no'):
+                        logger.info("Regenerating incomplete sections...")
+                        # TODO: Implement targeted regeneration
+                        logger.warning("Targeted regeneration not yet implemented.")
+                        logger.warning("Tip: Re-run generation with higher --max-tokens or split into smaller sections")
+                except (KeyboardInterrupt, EOFError):
+                    logger.warning("\nSkipping regeneration")
+            else:
+                logger.success("✅ All sections complete!")
+
+            logger.info("")
             logger.info(f"{'='*60}")
             logger.info(f"  COMPLETE")
             logger.info(f"{'='*60}")

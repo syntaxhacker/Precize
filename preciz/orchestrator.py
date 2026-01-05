@@ -70,7 +70,7 @@ class GenerateTool:
             Message(role="user", content=prompt),
         ]
 
-        response = self.llm.complete(messages, temperature=0.7, max_tokens=3000)
+        response = self.llm.complete(messages, temperature=0.7, max_tokens=8000)
         return response.content
 
     def generate_with_preferences(
@@ -106,7 +106,7 @@ class GenerateTool:
             Message(role="user", content=prompt),
         ]
 
-        response = self.llm.complete(messages, temperature=0.7, max_tokens=3000)
+        response = self.llm.complete(messages, temperature=0.7, max_tokens=8000)
         return response.content
 
 
@@ -250,7 +250,7 @@ class ImproveTool:
             Message(role="user", content=prompt),
         ]
 
-        response = self.llm.complete(messages, temperature=0.5, max_tokens=3000)
+        response = self.llm.complete(messages, temperature=0.5, max_tokens=8000)
         return response.content
 
     def improve_with_preferences(
@@ -287,7 +287,7 @@ class ImproveTool:
             Message(role="user", content=prompt),
         ]
 
-        response = self.llm.complete(messages, temperature=0.5, max_tokens=3000)
+        response = self.llm.complete(messages, temperature=0.5, max_tokens=8000)
         return response.content
 
 
