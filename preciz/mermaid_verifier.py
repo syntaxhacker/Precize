@@ -142,22 +142,24 @@ def convert_mermaid_with_retry(
         max_retries: Maximum number of fix attempts
 
     Returns:
-        (success: bool, final_code_used: str)
+        (success: bool, final_code_used: str, last_error: str)
     """
     current_code = mermaid_code
+    last_error = ""
 
     for attempt in range(max_retries + 1):
         # Try conversion
         success, error = try_convert_mermaid(current_code, output_path)
+        last_error = error
 
         if success:
-            return True, current_code
+            return True, current_code, ""
 
         if attempt < max_retries:
             # Ask LLM to fix it
             current_code = fix_mermaid_with_llm(current_code, error, context, llm)
 
-    return False, current_code
+    return False, current_code, last_error
 
 
 def verify_and_convert_mermaid(
@@ -207,7 +209,7 @@ def verify_and_convert_mermaid(
         output_path = images_dir_path / filename
 
         # Try to convert (with LLM fix retries)
-        success, fixed_code = convert_mermaid_with_retry(
+        success, fixed_code, error = convert_mermaid_with_retry(
             mermaid_code=block.code,
             output_path=output_path,
             context=section_title,
@@ -228,6 +230,8 @@ def verify_and_convert_mermaid(
             # Keep original mermaid code if conversion fails
             if logger:
                 logger.warning(f"     ✗ Failed to convert diagram {block.index} after retries")
+                if error:
+                    logger.warning(f"     → Error: {error[:200]}")  # First 200 chars of error
                 logger.warning(f"     → Keeping original mermaid code")
 
     return updated_content

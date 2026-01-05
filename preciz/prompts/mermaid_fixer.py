@@ -26,13 +26,18 @@ def build_fix_mermaid_prompt(original_code: str, error: str, context: str) -> st
 {context[:300]}
 
 **Common Mermaid Issues to Fix:**
-1. Missing semicolons after statements
-2. Incorrect syntax (flowchart vs graph vs sequenceDiagram)
-3. Invalid node IDs (use alphanumeric and underscores only, no spaces)
-4. Missing quotes around labels with spaces
-5. Unclosed brackets or parentheses
-6. Invalid classDef syntax (must be: classDef name fill:#color,stroke:#color)
-7. Double curly braces in init (use {{{{ and }}}} for escaping)
+1. **CRITICAL: Curly braces {{}} in edge labels** - Edge labels containing curly braces MUST be quoted
+   - WRONG: A -->|Props: {{name}}| B
+   - RIGHT: A -->|"Props: name"| B or A -->|Props name| B
+2. **CRITICAL: Incomplete classDef** - Every classDef must have style definitions
+   - WRONG: classDef child
+   - RIGHT: classDef child fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+3. Missing semicolons after statements (in sequenceDiagram)
+4. Incorrect syntax (flowchart vs graph vs sequenceDiagram)
+5. Invalid node IDs (use alphanumeric and underscores only, no spaces)
+6. Missing quotes around labels with special characters
+7. Unclosed brackets or parentheses
+8. Double curly braces in init (use {{{{ and }}}} for escaping)
 
 **Mermaid Style Requirements:**
 - Use horizontal layout: flowchart LR or graph LR

@@ -437,7 +437,7 @@ flowchart LR
 ```
 
 **DIAGRAM REQUIREMENTS:**
-- ALWAYS use horizontal layout (flowchart LR or graph LR)
+- ALWAYS use horizontal layout (flowchart LR or graph LR) - NEVER use TD (top-down)
 - Use %%{{init: {{'theme':'neutral'}}}}%% for clean backgrounds
 - Add white arrow styling: %%{{init: {{'theme':'neutral', 'themeVariables': {{'lineColor': '#ffffff'}}}}}}%%
 - Apply color coding with classDef (success, error, warning, info, normal)
@@ -446,6 +446,16 @@ flowchart LR
 - Structure: Entry → Processing → Decision → Output/Loop
 - **MEANINGFUL LABELS**: Each diagram MUST have descriptive labels that explain what it shows
 - **CONTEXT**: Create diagrams that directly relate to the topic with clear, context-specific labels
+
+**CRITICAL DIAGRAM SYNTAX RULES:**
+1. **NEVER use curly braces {{}} in edge labels** - This causes parse errors
+   - WRONG: A -->|Props: {{className}}| B
+   - RIGHT: A -->|"Props: className"| B (use quotes) or A -->|Props className| B (remove braces)
+2. **EVERY classDef must have complete style definitions**
+   - WRONG: classDef child
+   - RIGHT: classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+3. **Quote labels with special characters** (spaces, colons, etc.)
+4. **No undefined classes** - Every class in class statements must have a classDef
 """)
 
     # Table examples
