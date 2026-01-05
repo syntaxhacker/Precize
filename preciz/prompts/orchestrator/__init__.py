@@ -1,5 +1,11 @@
 """Prompts for the orchestrator-based document generator."""
 
+from ...preferences import (
+    ContentPreferences,
+    build_teaching_layers,
+    format_preferences_for_prompt,
+)
+
 
 def build_generate_section_prompt(
     topic: str,
@@ -258,4 +264,370 @@ Return ONLY valid JSON. Example format:
 - level 3: Advanced/deep dive topic
 
 Respond ONLY with the JSON object. No markdown, no code blocks, just the raw JSON.
+"""
+
+
+def build_generate_section_prompt_with_preferences(
+    topic: str,
+    section_title: str,
+    description: str,
+    context: str,
+    preferences: ContentPreferences,
+) -> str:
+    """Build prompt for generating content with user preferences.
+
+    Args:
+        topic: Document topic
+        section_title: Current section title
+        description: Section description
+        context: Previous content context
+        preferences: User content preferences
+
+    Returns:
+        Formatted prompt string
+    """
+    # Build requirements based on preferences
+    requirements = []
+
+    if preferences.include_analogies and preferences.audience_level == "beginner":
+        requirements.append("- Start with everyday analogies before technical terms")
+
+    if preferences.include_code:
+        lang = f" ({preferences.code_language})" if preferences.code_language else ""
+        requirements.append(f"- Include {preferences.code_examples_per_section} runnable code examples{lang}")
+        requirements.append("- Explain code line-by-line where needed")
+    else:
+        requirements.append("- **CRITICAL: NO CODE BLOCKS WHATSOEVER**")
+        requirements.append("- **ABSOLUTELY NO** code blocks, syntax examples, or implementation details")
+        requirements.append("- **DO NOT** use ```javascript, ```jsx, ```python, or ANY code fences")
+        requirements.append("- Explain concepts using ONLY: analogies, diagrams, tables, and plain text descriptions")
+        requirements.append("- If you feel tempted to show code, use a conceptual explanation instead")
+
+    if preferences.include_diagrams:
+        diagram_list = ", ".join(preferences.diagram_types)
+        requirements.append(f"- Include mermaid diagrams ({diagram_list})")
+    else:
+        requirements.append("- No diagrams - text content only")
+
+    if preferences.include_tables:
+        requirements.append("- Include comparison/summary tables for concepts")
+    else:
+        requirements.append("- No tables")
+
+    # Build teaching layers based on style
+    teaching_layers = build_teaching_layers(
+        preferences.teaching_style,
+        preferences.audience_level,
+    )
+
+    req_text = "\n".join(requirements)
+
+    # Build examples section based on what's enabled/disabled
+    examples_section = build_examples_section(preferences)
+
+    return f"""You are creating a comprehensive guide for: {topic}
+
+**This Section**: {section_title}
+
+**Section Description**: {description}
+
+{format_preferences_for_prompt(preferences)}
+
+---
+
+{teaching_layers}
+
+## CONTENT REQUIREMENTS
+
+{req_text}
+
+{examples_section}
+
+## STRUCTURE RULES
+
+1. **DO NOT** print layer headers like "Foundation Layer:", "Concept Layer:", etc.
+2. **DO** transition naturally between sections
+3. **DO** use progressive complexity - start simple, add complexity gradually
+4. **DO** maintain continuity with previous sections (refer back when relevant)
+
+## QUALITY CHECKLIST
+
+- Starts appropriate for {preferences.audience_level} level?
+- {"Analogies included before technical terms?" if preferences.include_analogies else "Direct technical approach?"}
+- {"3-5 working code examples?" if preferences.include_code else "No code as requested?"}
+- {"Diagrams included?" if preferences.include_diagrams else "No diagrams as requested?"}
+- Common mistakes addressed?
+- Real-world context included?
+
+Aim for 120-200 lines of comprehensive content.
+
+---
+
+Respond ONLY with the markdown content. Start immediately with the section heading (## or ###).
+Do NOT include any preamble, explanations, or layer labels in your response.
+"""
+
+
+def build_examples_section(preferences: ContentPreferences) -> str:
+    """Build concrete examples of what's right vs wrong based on preferences.
+
+    Args:
+        preferences: User content preferences
+
+    Returns:
+        Formatted examples section
+    """
+    examples = []
+
+    # Code examples
+    if not preferences.include_code:
+        examples.append("""
+### CODE - ABSOLUTELY FORBIDDEN:
+**WRONG** ❌ - DO NOT DO THIS:
+```javascript
+function Welcome() {{
+  return <h1>Hello</h1>;
+}}
+```
+**WRONG** ❌ - DO NOT DO THIS EITHER:
+```jsx
+const component = <div>Hello</div>;
+```
+**WRONG** ❌ - OR THIS:
+\`\`\`html
+<div>Hello</div>
+\`\`\`
+
+**RIGHT** ✅ - EXPLAIN CONCEPTUALLY:
+Think of a component like a recipe card. Just as a recipe card tells you the ingredients and steps to make a dish, a React component describes what should appear on the screen. When you use the component, React "cooks" the UI by following the component's instructions. The component doesn't contain the actual UI—it's just a blueprint for creating it.
+
+For example, a "UserProfile" component blueprint might specify: show the user's name in large text, display their avatar image in a circle, and list their bio below. When React uses this blueprint, it actually creates the HTML elements. But the blueprint itself is just a description, not the code.
+
+**Use analogies, diagrams, and tables instead of ANY code.**
+""")
+
+    # Diagram examples
+    if preferences.include_diagrams:
+        examples.append("""
+### DIAGRAMS - WHAT TO INCLUDE:
+**WRONG** ❌:
+```mermaid
+flowchart TD
+    A[A] --> B[B]
+    B --> C[C]
+```
+
+**RIGHT** ✅:
+```mermaid
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A[🚀 Parent Component] -->|Passes Props| B[🎯 Child Component]
+    B -->|Manages| C[🔄 Internal State]
+    C -->|Updates| D[✅ Re-render UI]
+
+    classDef parent fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef state fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A parent
+    class B child
+    class C state
+    class D success
+```
+
+**DIAGRAM REQUIREMENTS:**
+- ALWAYS use horizontal layout (flowchart LR or graph LR)
+- Use %%{{init: {{'theme':'neutral'}}}}%% for clean backgrounds
+- Add white arrow styling: %%{{init: {{'theme':'neutral', 'themeVariables': {{'lineColor': '#ffffff'}}}}}}%%
+- Apply color coding with classDef (success, error, warning, info, normal)
+- Use emoji icons: 🚀(start), ✅(success), 🚨(error), 🔄(retry), 📊(data), 🎯(core), 🧠(processing)
+- Keep diagrams wide (3.5:1 to 4:1 aspect ratio)
+- Structure: Entry → Processing → Decision → Output/Loop
+- **MEANINGFUL LABELS**: Each diagram MUST have descriptive labels that explain what it shows
+- **CONTEXT**: Create diagrams that directly relate to the topic with clear, context-specific labels
+""")
+
+    # Table examples
+    if preferences.include_tables:
+        examples.append("""
+### TABLES - WHAT TO INCLUDE:
+**RIGHT** ✅:
+| Feature | Props | State |
+|---------|-------|-------|
+| Source | Passed from parent | Managed internally |
+| Can Change | No | Yes |
+| Purpose | Configuration | Dynamic data |
+
+Use tables to compare concepts, list variations, or summarize key differences.
+""")
+
+    # Analogy examples for beginners
+    if preferences.include_analogies and preferences.audience_level == "beginner":
+        examples.append("""
+### ANALOGIES - HOW TO USE THEM:
+**RIGHT** ✅:
+"Think of React components like kitchen appliances in a restaurant. Just as a blender, oven, and refrigerator each have one specific job, each React component handles one piece of your interface. The blender doesn't tell the oven what to cook—it just blends. Similarly, components stay focused on their own responsibility."
+
+Start every major concept with an everyday analogy before introducing technical terms.
+""")
+
+    # Advanced audience examples
+    if preferences.audience_level == "advanced" and not preferences.include_analogies:
+        examples.append("""
+### ADVANCED CONTENT - HOW TO APPROACH:
+**RIGHT** ✅:
+"React's component model follows the Single Responsibility Principle. Each component encapsulates its own state management and rendering logic, enabling composition patterns that scale to complex applications. The virtual DOM diffing algorithm optimizes updates by..."
+
+Use formal terminology, discuss architecture patterns, and focus on production considerations.
+""")
+
+    if examples:
+        return "## EXAMPLES: WHAT'S RIGHT vs WHAT'S WRONG\n" + "".join(examples)
+    else:
+        return ""
+
+
+def build_review_prompt_with_preferences(
+    content: str,
+    title: str,
+    preferences: ContentPreferences,
+) -> str:
+    """Build review prompt that checks against user preferences."""
+    # Build checklist based on preferences
+    checklist = []
+
+    if preferences.audience_level == "beginner":
+        checklist.extend([
+            "1. Starts from ZERO prior knowledge? (no assumptions)",
+            "2. Builds mental models concretely?",
+        ])
+        if preferences.include_analogies:
+            checklist.append("3. Uses everyday analogies before technical terms?")
+    elif preferences.audience_level == "intermediate":
+        checklist.extend([
+            "1. Bridges from known concepts?",
+            "2. Appropriate technical depth?",
+        ])
+    else:  # advanced
+        checklist.extend([
+            "1. Assumes appropriate prior knowledge?",
+            "2. Sufficient technical depth?",
+        ])
+
+    if preferences.include_code:
+        checklist.extend([
+            f"{len(checklist) + 1}. Real, working code (not pseudocode)?",
+            f"{len(checklist) + 2}. {preferences.code_examples_per_section}+ concrete examples?",
+        ])
+
+    if preferences.include_diagrams:
+        checklist.append(f"{len(checklist) + 1}. Mermaid diagrams included?")
+
+    if preferences.include_tables:
+        checklist.append(f"{len(checklist) + 1}. Comparison tables included?")
+
+    checklist.extend([
+        f"{len(checklist) + 1}. 100+ lines of content?",
+        f"{len(checklist) + 1}. Progressive complexity maintained?",
+        f"{len(checklist) + 1}. No layer headers?",
+    ])
+
+    checklist_text = "\n".join(checklist)
+
+    return f"""Review this tutorial section for quality.
+
+**Section**: {title}
+
+**Content Preview**:
+```
+{content[:3000]}
+```
+
+**Configuration**:
+- Audience: {preferences.audience_level}
+- Style: {preferences.teaching_style}
+- Analogies: {preferences.include_analogies}
+- Code: {preferences.include_code}
+- Diagrams: {preferences.include_diagrams}
+- Tables: {preferences.include_tables}
+
+**Quality Checklist**:
+{checklist_text}
+
+Response JSON:
+```json
+{{
+  "passed": true/false,
+  "issues": ["Missing code examples", "No diagrams included", "Too advanced for beginner"],
+  "suggestions": ["Add 3 code examples", "Include mermaid flowchart", "Simplify technical language"]
+}}
+```
+
+Be strict - ensure content matches the requested configuration.
+"""
+
+
+def build_improve_prompt_with_preferences(
+    content: str,
+    issues: list[str],
+    suggestions: list[str],
+    preferences: ContentPreferences,
+) -> str:
+    """Build improve prompt that respects user preferences."""
+    issues_text = "\n".join(f"- {i}" for i in issues)
+    suggestions_text = "\n".join(f"- {s}" for s in suggestions)
+
+    improvement_framework = []
+    improvement_framework.append("## IMPROVEMENT FRAMEWORK")
+    improvement_framework.append("")
+
+    if preferences.audience_level == "beginner":
+        improvement_framework.append("### For Beginner Audience:")
+        improvement_framework.append("- Start from absolute zero")
+        if preferences.include_analogies:
+            improvement_framework.append("- Add everyday analogies")
+        improvement_framework.append("- Explain all jargon")
+        improvement_framework.append("")
+
+    improvement_framework.append("### Based on Issues:")
+    if "code" in " ".join(issues).lower() and preferences.include_code:
+        improvement_framework.append(f"- Add {preferences.code_examples_per_section} runnable code examples")
+        if preferences.code_language:
+            improvement_framework.append(f"- Use {preferences.code_language} for examples")
+    if "diagram" in " ".join(issues).lower() and preferences.include_diagrams:
+        improvement_framework.append("- Add mermaid diagrams")
+    if "table" in " ".join(issues).lower() and preferences.include_tables:
+        improvement_framework.append("- Add comparison tables")
+
+    framework_text = "\n".join(improvement_framework)
+
+    return f"""Improve this tutorial section to meet quality standards.
+
+**Original Section**:
+```
+{content[:4000]}
+```
+
+**Issues to Fix**:
+{issues_text}
+
+**Suggestions**:
+{suggestions_text}
+
+**Target Configuration**:
+- Audience: {preferences.audience_level}
+- Style: {preferences.teaching_style}
+- Code: {preferences.include_code} (examples: {preferences.code_examples_per_section})
+- Diagrams: {preferences.include_diagrams}
+- Tables: {preferences.include_tables}
+
+---
+
+{framework_text}
+
+**Important**: Keep the expanded structure but DO NOT include layer headers.
+Transition naturally between sections.
+
+Rewrite to address all issues. Respond ONLY with improved markdown.
 """

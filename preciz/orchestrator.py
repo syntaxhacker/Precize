@@ -22,6 +22,7 @@ from typing import Literal
 from .config import Config
 from .llm import LLMClient, Message, LLMResponse
 from .prompts import orchestrator as orch_prompts
+from .preferences import ContentPreferences
 
 
 # ========== TOOLS ==========
@@ -59,6 +60,42 @@ class GenerateTool:
         """
         prompt = orch_prompts.build_generate_section_prompt(
             topic, section_title, description, context, include_mermaid, include_table, include_examples
+        )
+
+        messages = [
+            Message(
+                role="system",
+                content="You are an expert technical writer creating educational content.",
+            ),
+            Message(role="user", content=prompt),
+        ]
+
+        response = self.llm.complete(messages, temperature=0.7, max_tokens=3000)
+        return response.content
+
+    def generate_with_preferences(
+        self,
+        topic: str,
+        section_title: str,
+        description: str,
+        context: str,
+        preferences: ContentPreferences,
+    ) -> str:
+        """
+        Generate a content block using user preferences.
+
+        Args:
+            topic: Overall document topic
+            section_title: Title of this section
+            description: What this section covers
+            context: What came before (for continuity)
+            preferences: User content preferences
+
+        Returns:
+            Generated markdown content
+        """
+        prompt = orch_prompts.build_generate_section_prompt_with_preferences(
+            topic, section_title, description, context, preferences
         )
 
         messages = [
@@ -145,6 +182,42 @@ class ReviewTool:
 
         return {"passed": True, "issues": [], "suggestions": []}
 
+    def review_with_preferences(
+        self,
+        content: str,
+        title: str,
+        preferences: ContentPreferences,
+    ) -> dict:
+        """
+        Review content for quality using user preferences.
+
+        Args:
+            content: Content to review
+            title: Section title
+            preferences: User content preferences
+
+        Returns:
+            Dict with passed, issues, suggestions
+        """
+        prompt = orch_prompts.build_review_prompt_with_preferences(content, title, preferences)
+
+        messages = [
+            Message(role="system", content="You are a technical content reviewer."),
+            Message(role="user", content=prompt),
+        ]
+
+        response = self.llm.complete(messages, temperature=0.3, max_tokens=1000)
+
+        # Parse JSON
+        json_match = re.search(r"\{.*\}", response.content, re.DOTALL)
+        if json_match:
+            try:
+                return json.loads(json_match.group(0))
+            except json.JSONDecodeError:
+                pass
+
+        return {"passed": True, "issues": [], "suggestions": []}
+
 
 class ImproveTool:
     """Tool to improve content based on feedback."""
@@ -171,6 +244,43 @@ class ImproveTool:
         suggestions = "\n".join(f"- {s}" for s in feedback.get("suggestions", []))
 
         prompt = orch_prompts.build_improve_prompt(content, issues, suggestions)
+
+        messages = [
+            Message(role="system", content="You improve technical content."),
+            Message(role="user", content=prompt),
+        ]
+
+        response = self.llm.complete(messages, temperature=0.5, max_tokens=3000)
+        return response.content
+
+    def improve_with_preferences(
+        self,
+        content: str,
+        title: str,
+        feedback: dict,
+        preferences: ContentPreferences,
+    ) -> str:
+        """
+        Improve content based on review feedback using user preferences.
+
+        Args:
+            content: Original content
+            title: Section title
+            feedback: Review feedback
+            preferences: User content preferences
+
+        Returns:
+            Improved content
+        """
+        if feedback.get("passed", True):
+            return content
+
+        issues = feedback.get("issues", [])
+        suggestions = feedback.get("suggestions", [])
+
+        prompt = orch_prompts.build_improve_prompt_with_preferences(
+            content, issues, suggestions, preferences
+        )
 
         messages = [
             Message(role="system", content="You improve technical content."),

@@ -78,7 +78,7 @@ preciz-gen-long <topic> <output_file> [options]
 
 ### Description
 
-Creates a detailed outline, then generates each section using the orchestrator pattern. The CLI uses `DocumentOrchestrator` (NOT `BlockContentGenerator`).
+Creates a detailed outline, then generates each section using the orchestrator pattern with customizable content preferences. The CLI uses `DocumentOrchestrator` (NOT `BlockContentGenerator`).
 
 ### Options
 
@@ -90,6 +90,21 @@ Creates a detailed outline, then generates each section using the orchestrator p
 | `--parts <n>` | Number of parts for 'parts' mode (overrides auto-calc) | auto |
 | `-h, --help` | Show help message | |
 
+### Content Customization
+
+| Option | Description | Values |
+|--------|-------------|--------|
+| `--audience <level>` | Target audience level | beginner, intermediate, advanced |
+| `--style <style>` | Teaching style | progressive, direct, reference |
+| `--no-analogies` | Skip everyday analogies | - |
+| `--no-code` | Skip code examples | - |
+| `--no-diagrams` | Skip mermaid diagrams | - |
+| `--no-tables` | Skip comparison tables | - |
+| `--code-lang <lang>` | Specific language for code examples | python, javascript, etc. |
+| `--code-examples <n>` | Number of code examples per section | 3 (default) |
+
+**Note**: Without customization flags, the CLI will prompt you interactively for preferences.
+
 ### Generation Modes
 
 | Mode | Description | When to Use |
@@ -99,17 +114,45 @@ Creates a detailed outline, then generates each section using the orchestrator p
 | `parts` | Simple numbered parts | Most reliable - when LLM outline fails |
 | `custom` | Load sections from JSON file | When you want full control over structure |
 
+### Audience Levels
+
+| Level | Description | Content Style |
+|-------|-------------|---------------|
+| `beginner` | Zero prior knowledge | Everyday analogies, step-by-step, "why" before "what" |
+| `intermediate` | Some prior knowledge | Bridges from known concepts, targeted analogies |
+| `advanced` | Deep technical dive | Formal definitions, architecture, production patterns |
+
+### Teaching Styles
+
+| Style | Description | Structure |
+|-------|-------------|-----------|
+| `progressive` | Build from zero to mastery | Foundation → Concept → Implementation → Mastery |
+| `direct` | Jump to technical content | Core Concepts → Implementation → Reference |
+| `reference` | Encyclopedia style | Hierarchical organization, comprehensive coverage |
+
 ### Examples
 
 ```bash
-# Basic usage (auto mode)
+# Basic usage (auto mode, interactive preferences)
 preciz-gen-long "Differential Calculus" calculus.md
+
+# Non-interactive: advanced audience, direct style
+preciz-gen-long "API Design" api.md --audience advanced --style direct --no-analogies
+
+# Non-interactive: beginner guide without diagrams
+preciz-gen-long "Git Basics" git.md --audience beginner --no-diagrams
+
+# Non-interactive: reference style, no code
+preciz-gen-long "HTTP History" http.md --style reference --no-code
 
 # Custom length with LLM mode
 preciz-gen-long "Python Basics" python.md --lines 5000 --gen-mode llm
 
+# Code-heavy with specific language
+preciz-gen-long "React Patterns" react.md --audience advanced --code-lang typescript --code-examples 5
+
 # Parts mode with automatic calculation
-preciz-gen-long "React" react.md --lines 15000 --gen-mode parts
+preciz-gen-long "Machine Learning" ml.md --lines 15000 --gen-mode parts
 
 # Parts mode with explicit number of parts
 preciz-gen-long "React" react.md --gen-mode parts --parts 20
@@ -118,7 +161,64 @@ preciz-gen-long "React" react.md --gen-mode parts --parts 20
 preciz-gen-long "ML Basics" ml.md --gen-mode custom my_sections.json
 
 # More iterations (higher quality)
-preciz-gen-long "Machine Learning" ml.md --lines 50000 --iter 3
+preciz-gen-long "Distributed Systems" ds.md --lines 50000 --iter 3 --audience advanced
+```
+
+### Interactive Mode
+
+When you run without customization flags, you'll be prompted:
+
+```
+============================================================
+  Content Customization for: Differential Calculus
+============================================================
+
+1. Target Audience:
+   [1] Absolute Beginner (zero prior knowledge)
+   [2] Intermediate (some prior knowledge)
+   [3] Advanced (deep technical dive)
+   Choose [1-3] [default: 1]: 1
+
+2. Include Analogies?
+   [Y]es - Use everyday analogies to explain concepts
+   [N]o - Direct technical approach
+   Include analogies? [Y/n] [default: Y]: Y
+
+3. Include Code Examples?
+   [Y]es - With runnable examples
+   [N]o - Concepts and theory only
+   Include code? [Y/n] [default: Y]: Y
+   Language [default: auto-detect]: python
+   Examples per section [default: 3]: 5
+
+4. Include Diagrams?
+   [Y]es - Add mermaid diagrams
+   [N]o - Text-only content
+   Include diagrams? [Y/n] [default: Y]:
+
+5. Include Comparison Tables?
+   [Y]es - Add tables for concepts
+   [N]o - No tables
+   Include tables? [Y/n] [default: Y]:
+
+6. Teaching Style:
+   [1] Progressive - Foundation → Concept → Implementation
+   [2] Direct - Jump straight to technical content
+   [3] Reference - Encyclopedia style
+   Choose [1-3] [default: 1]: 1
+
+============================================================
+  Configuration Summary
+============================================================
+  Audience:      Beginner
+  Style:         Progressive
+  Analogies:     Yes
+  Code:          Yes
+    Language:    python
+    Examples:    5/section
+  Diagrams:      Yes
+  Tables:        Yes
+============================================================
 ```
 
 ### Custom Sections File Format

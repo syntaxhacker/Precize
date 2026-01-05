@@ -10,6 +10,11 @@ from typing import Literal
 from .orchestrator import DocumentOrchestrator, BlockTask
 from .config import Config
 from .llm import Message
+from .preferences import (
+    ContentPreferences,
+    prompt_interactive_preferences,
+    parse_preferences_args,
+)
 
 
 def print_usage():
@@ -27,17 +32,34 @@ def print_usage():
     print("  preciz-gen-long 'ML Basics' ml.md --gen-mode parts --lines 3000")
     print("  preciz-gen-long 'Python' python.md --gen-mode custom my_sections.json")
     print()
+    print("  # With content customization (non-interactive)")
+    print("  preciz-gen-long 'API Design' api.md --audience advanced --style direct")
+    print("  preciz-gen-long 'Git Basics' git.md --audience beginner --no-diagrams")
+    print("  preciz-gen-long 'HTTP History' http.md --style reference --no-code")
+    print()
     print("Options:")
     print("  --lines <n>       Target line count (default: 10000)")
     print("  --iter <n>        Max review iterations per block (default: 2)")
     print("  --gen-mode <mode> Generation mode (default: auto)")
-    print("  --parts <n>       Number of parts for 'parts' mode (default: auto from --lines)")
+    print("  --parts <n>       Number of parts for 'parts' mode (default: auto)")
+    print()
+    print("Content Customization (optional flags, otherwise prompts interactively):")
+    print("  --audience <level>     Target audience: beginner, intermediate, advanced")
+    print("  --style <style>        Teaching style: progressive, direct, reference")
+    print("  --no-analogies         Skip everyday analogies (direct technical)")
+    print("  --no-code              Skip code examples (theory only)")
+    print("  --no-diagrams          Skip mermaid diagrams (text only)")
+    print("  --no-tables            Skip comparison tables")
+    print("  --code-lang <lang>     Specific language for code (e.g., python)")
+    print("  --code-examples <n>    Number of code examples per section (default: 3)")
     print()
     print("Generation Modes:")
     print("  auto    - Try LLM outline, fall back to parts if it fails")
     print("  llm     - Use LLM to create detailed outline (best quality)")
     print("  parts   - Simple numbered parts (most reliable)")
     print("  custom  - Use custom sections from a file")
+    print()
+    print("Without customization flags, you'll be prompted interactively for preferences.")
 
 
 def parse_args(args: list[str]) -> tuple[str, str, int, int, str, int | None]:
@@ -308,6 +330,14 @@ def main() -> int:
     )
 
     try:
+        # Collect preferences (check for flags or prompt interactively)
+        preferences = parse_preferences_args(args)
+
+        if preferences is None:
+            # No flags found, prompt interactively
+            # Exit logger context temporarily for interactive input
+            preferences = prompt_interactive_preferences(topic)
+
         with logger:
             logger.info(f"{'='*60}")
             logger.info(f"  PRECIZ CONTENT GENERATOR")
@@ -317,6 +347,19 @@ def main() -> int:
             logger.info(f"Output: {output}")
             logger.info(f"Target: {target_lines} lines")
             logger.info(f"Mode: {gen_mode}")
+
+            # Log preferences
+            logger.info(f"")
+            logger.info(f"Content Preferences:")
+            logger.info(f"  Audience: {preferences.audience_level}")
+            logger.info(f"  Style: {preferences.teaching_style}")
+            logger.info(f"  Analogies: {'Yes' if preferences.include_analogies else 'No'}")
+            logger.info(f"  Code: {'Yes' if preferences.include_code else 'No'}")
+            if preferences.include_code:
+                logger.info(f"    Language: {preferences.code_language or 'Auto-detect'}")
+                logger.info(f"    Examples: {preferences.code_examples_per_section}/section")
+            logger.info(f"  Diagrams: {'Yes' if preferences.include_diagrams else 'No'}")
+            logger.info(f"  Tables: {'Yes' if preferences.include_tables else 'No'}")
 
             output_path = Path(output)
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -408,15 +451,13 @@ def main() -> int:
                 # Track LLM calls for content generation
                 section_start_time = time.time()
 
-                # Generate
-                content = orchestrator.generate_tool.generate(
+                # Generate with preferences
+                content = orchestrator.generate_tool.generate_with_preferences(
                     topic=topic,
                     section_title=task.title,
                     description=task.description,
                     context=context,
-                    include_mermaid=task.require_mermaid,
-                    include_table=task.require_table,
-                    include_examples=task.require_examples,
+                    preferences=preferences,
                 )
 
                 section_time = time.time() - section_start_time
@@ -434,10 +475,12 @@ def main() -> int:
 
                 logger.info(f"  → Generated {len(content.split(chr(10)))} lines")
 
-                # Review
+                # Review with preferences
                 for iteration in range(max_iterations):
                     logger.info(f"  → Review {iteration + 1}/{max_iterations}")
-                    feedback = orchestrator.review_tool.review(content, task.title)
+                    feedback = orchestrator.review_tool.review_with_preferences(
+                        content, task.title, preferences
+                    )
 
                     if feedback.get("passed", True):
                         logger.info("    ✓ Passed")
@@ -452,7 +495,9 @@ def main() -> int:
                             logger.info(f"    ⚠ {len(issues)} issue(s)")
 
                         # Log improvement
-                        improved = orchestrator.improve_tool.improve(content, task.title, feedback)
+                        improved = orchestrator.improve_tool.improve_with_preferences(
+                            content, task.title, feedback, preferences
+                        )
                         logger.log_llm_request(
                             prompt=f"Improve section: {task.title}",
                             response="Content improved based on feedback",
@@ -463,6 +508,18 @@ def main() -> int:
                             success=True,
                         )
                         content = improved
+
+                # Verify and convert Mermaid diagrams to PNG
+                if preferences.include_diagrams:
+                    from .mermaid_verifier import verify_and_convert_mermaid
+                    content = verify_and_convert_mermaid(
+                        content=content,
+                        section_index=i,
+                        section_title=task.title,
+                        llm=orchestrator.llm,
+                        images_dir="images",
+                        logger=logger
+                    )
 
                 # Append
                 total_lines = append_tool.append(content)
