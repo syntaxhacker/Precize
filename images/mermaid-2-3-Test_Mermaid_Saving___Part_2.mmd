@@ -1,0 +1,14 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    %% Node Shapes %%
+    A["🚀 Rectangular Box"] --- B["✅ Rounded Box"]
+
+    %% Connections with Labels %%
+    B -->|"Arrow with Label"| C{"🚨 Diamond (Decision)"}
+
+    %% Styling Application %%
+    classDef blueStyle fill:#cce5ff,stroke:#0066cc,stroke-width:2px
+    classDef yellowStyle fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+
+    class A,B blueStyle
+    class C yellowStyle

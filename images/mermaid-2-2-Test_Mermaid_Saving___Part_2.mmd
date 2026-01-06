@@ -1,0 +1,11 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🚀 Start: Open Editor"] --> B["📝 Write Code"] --> C["💾 Save File"] --> D["✅ Success!"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef process fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B,C process
+    class D success

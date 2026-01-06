@@ -1,0 +1,24 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart TD
+    A["Start: Create Diagram"] --> B["Validate Syntax"]
+    B --> C{"Valid?"}
+    C -->|No| D["Fix Errors"]
+    D --> B
+    C -->|Yes| E["Choose Filename"]
+    E --> F["Check for Duplicates"]
+    F --> G{"OK to Save?"}
+    G -->|No| H["Rename/Cancel"]
+    H --> E
+    G -->|Yes| I["💾 Save File"]
+    I --> J["✅ Complete"]
+
+    classDef decision fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef action fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef error fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+
+    class C decision
+    class G decision
+    class A,B,E,F,I action
+    class J success
+    class D,H error

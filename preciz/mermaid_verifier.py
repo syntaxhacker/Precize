@@ -226,6 +226,11 @@ def verify_and_convert_mermaid(
         )
 
         if success:
+            # Save the mermaid source file for debugging
+            mmd_filename = filename.replace('.png', '.mmd')
+            mmd_path = images_dir_path / mmd_filename
+            mmd_path.write_text(fixed_code)
+
             # Replace mermaid block with image reference
             image_ref = f"![{section_title} Diagram {block.index}]({images_dir}/{filename})"
             updated_content = updated_content.replace(
@@ -233,7 +238,7 @@ def verify_and_convert_mermaid(
                 image_ref
             )
             if logger:
-                logger.success(f"     ✓ Converted: {filename}")
+                logger.success(f"     ✓ Converted: {filename} (source saved: {mmd_filename})")
         else:
             # Keep original mermaid code if conversion fails
             if logger:

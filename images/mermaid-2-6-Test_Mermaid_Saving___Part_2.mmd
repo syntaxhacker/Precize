@@ -1,0 +1,24 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    subgraph Authentication ["Authentication Process"]
+        direction TB
+        A["User Enters Credentials"] --> B["System Validates Input"]
+    end
+
+    B --> C{"Is Password Valid?"}
+
+    C -->|Yes| D["Generate Session Token"]
+    C -->|No| E["Show Error Message"]
+
+    D --> F["Redirect to Dashboard"]
+    E --> A
+
+    classDef input fill:#e2e3e5,stroke:#6c757d,stroke-width:2px
+    classDef logic fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px
+    classDef error fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+
+    class A input
+    class C logic
+    class D,F success
+    class E error
