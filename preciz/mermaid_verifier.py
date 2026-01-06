@@ -208,9 +208,17 @@ def verify_and_convert_mermaid(
         filename = f"mermaid-{section_index+1}-{block.index}-{safe_title}.png"
         output_path = images_dir_path / filename
 
+        # Pre-fix common syntax errors before attempting conversion
+        from .mermaid_prefixer import pre_fix_mermaid
+        code_to_convert = pre_fix_mermaid(block.code)
+
+        # Check if pre-fix made changes
+        if code_to_convert != block.code and logger:
+            logger.info(f"     → Applied pre-fix to common syntax errors")
+
         # Try to convert (with LLM fix retries)
         success, fixed_code, error = convert_mermaid_with_retry(
-            mermaid_code=block.code,
+            mermaid_code=code_to_convert,
             output_path=output_path,
             context=section_title,
             llm=llm,

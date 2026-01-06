@@ -253,10 +253,32 @@ Return ONLY valid JSON. Example format:
 
 **For your topic ({topic})**:
 - Create 20-40 sections (each ~100-200 lines when written)
-- Early sections: Pure analogies and intuition (no jargon)
-- Middle sections: Formal concepts with visual diagrams
-- Later sections: Real code implementations with 3-5 examples each
-- Final sections: Performance analysis, real-world use cases, interview prep
+
+**CRITICAL PROGRESSION REQUIREMENTS**:
+1. **Foundation First (sections 1-8)**:
+   - Start with ZERO-KNOWLEDGE analogies (everyday examples)
+   - NO technical jargon in first 3-5 sections
+   - Build mental models before introducing notation
+   - For math/technical topics: Cover basic operations FIRST (order of operations, negative numbers, fractions)
+
+2. **Concept Building (sections 9-20)**:
+   - Introduce formal terminology AFTER intuition is established
+   - Connect new concepts to previously learned analogies
+   - Show "why" before "how"
+
+3. **Practice & Application (sections 21-30)**:
+   - Real code implementations with 3-5 examples each
+   - Progressive difficulty: basic → intermediate → advanced
+
+4. **Mastery (sections 31+)**:
+   - Performance analysis, real-world use cases, interview prep
+   - Advanced patterns and edge cases
+
+**Section Flow Checklist**:
+- [ ] Does section 1 start with pure analogies?
+- [ ] Are prerequisites covered before dependent topics?
+- [ ] Is there a clear "what" → "why" → "how" flow?
+- [ ] Do examples come BEFORE abstract notation?
 
 **Level meanings**:
 - level 1: Major section heading
@@ -349,6 +371,12 @@ def build_generate_section_prompt_with_preferences(
 2. **DO** transition naturally between sections
 3. **DO** use progressive complexity - start simple, add complexity gradually
 4. **DO** maintain continuity with previous sections (refer back when relevant)
+5. **CRITICAL** - Build knowledge progressively:
+   - Start with analogies/metaphors before technical terms
+   - Establish prerequisites BEFORE teaching dependent concepts
+   - For math/technical topics: teach basic operations (order of operations, negative numbers) BEFORE variables/equations
+   - Show concrete examples BEFORE abstract notation
+   - Explain "what" before "why" before "how"
 
 ## QUALITY CHECKLIST
 
@@ -448,23 +476,39 @@ flowchart LR
 - **CONTEXT**: Create diagrams that directly relate to the topic with clear, context-specific labels
 
 **CRITICAL DIAGRAM SYNTAX RULES:**
-1. **NEVER use reserved keywords** as classDef names or node IDs
+1. **ALL labels with special characters MUST be quoted** - This is the #1 cause of parse errors
+   - Special chars include: [] () {} <> : = + - * /
+   - WRONG: A[dp[1]] or B[F(5)] or C[a: b] or D[x + y]
+   - RIGHT: A["dp[1]"] or B["F(5)"] or C["a: b"] or D["x + y"]
+   - If in doubt, QUOTE IT!
+
+2. **NEVER use reserved keywords** as classDef names or node IDs
    - FORBIDDEN: end, start, subgraph, style, link, classDef, class
    - Use: final, begin, group, styling, connector, styleDef, category
-   - WRONG: classDef end ... class A end
-   - RIGHT: classDef final ... class A final
-2. **NEVER use forbidden characters in edge labels** - All cause parse errors:
-   - NO curly braces: {{}} - Use quotes or remove
-   - NO square brackets: [] - Use "empty array" or similar words
-   - NO HTML tags: <br/> <strong> etc - Use plain text only
-   - WRONG: A -->|Props: {{name}}| B or B -->|Array: []| C
-   - RIGHT: A -->|"Props name"| B or B -->|Empty array| C
-3. **ALWAYS use horizontal layout LR, never TD** - Use flowchart LR or graph LR
-4. **EVERY classDef must have complete style definitions**
+
+3. **FORBIDDEN in labels (edge or node)** - All cause parse errors:
+   - NO square brackets: [] - Use words "array", "index", or remove
+   - NO curly braces: {{}} - Use words or remove
+   - NO HTML tags: <br/> <strong> - Use plain text only
+   - NO unquoted parentheses: () in edge labels - Quote them
+   - WRONG: A -->|Array: []| B or B -->|Props: {{name}}| C or D["a<br/>b"]
+   - RIGHT: A -->|Empty array| B or B -->|"Props name"| C or D["a b"]
+
+4. **ALWAYS use horizontal layout LR** - Use flowchart LR or graph LR
+   - WRONG: flowchart TD
+   - RIGHT: flowchart LR
+
+5. **EVERY classDef must have complete style definitions**
    - WRONG: classDef child
    - RIGHT: classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
-5. **Quote labels with special characters** (spaces, colons, etc.)
-6. **No undefined classes** - Every class in class statements must have a classDef
+
+6. **Match class names exactly** - class statement must match classDef name
+   - WRONG: classDef start ... class A star
+   - RIGHT: classDef start ... class A start
+
+7. **Use double quotes for labels** - Single quotes can cause issues
+   - WRONG: A['label']
+   - RIGHT: A["label"]
 """)
 
     # Table examples
