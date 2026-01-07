@@ -327,7 +327,8 @@ def build_generate_section_prompt_with_preferences(
 
     if preferences.include_diagrams:
         diagram_list = ", ".join(preferences.diagram_types)
-        requirements.append(f"- Include mermaid diagrams ({diagram_list})")
+        requirements.append(f"- Include 2-3 simple mermaid diagrams ({diagram_list}) - each diagram should focus on ONE concept with 3-6 nodes max")
+        requirements.append("- **Multiple simple diagrams > One complex diagram** - Split complex ideas into separate diagrams")
     else:
         requirements.append("- No diagrams - text content only")
 
@@ -437,78 +438,113 @@ For example, a "UserProfile" component blueprint might specify: show the user's 
     # Diagram examples
     if preferences.include_diagrams:
         examples.append("""
-### DIAGRAMS - WHAT TO INCLUDE:
-**WRONG** ❌:
-```mermaid
-flowchart TD
-    A[A] --> B[B]
-    B --> C[C]
-```
+### DIAGRAMS - BEST PRACTICES:
 
-**RIGHT** ✅:
+**PRINCIPLE: Multiple Simple Diagrams > One Complex Diagram**
+
+Instead of creating one giant diagram with many subgraphs, create 2-3 separate, focused diagrams that each illustrate ONE concept clearly.
+
+**EXAMPLE 1 - Side-by-Side Comparison (Like Hardware Speedup)**
 ```mermaid
 %%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
 flowchart LR
-    A[🚀 Parent Component] -->|Passes Props| B[🎯 Child Component]
-    B -->|Manages| C[🔄 Internal State]
-    C -->|Updates| D[✅ Re-render UI]
+    subgraph Old["🐌 Old Machine"]
+        A1["10 items: 5 sec"]
+        A2["100 items: 50 sec"]
+        A1 -->|"10× data"| A2
+    end
 
-    classDef parent fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
-    classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
-    classDef state fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
-    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    subgraph New["🚀 New Machine"]
+        B1["10 items: 1 sec"]
+        B2["100 items: 10 sec"]
+        B1 -->|"10× data"| B2
+    end
 
-    class A parent
-    class B child
-    class C state
-    class D success
+    Old -->|"5× faster"| New
+
+    classDef old fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef new fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A1,A2 old
+    class B1,B2 new
 ```
 
-**DIAGRAM REQUIREMENTS:**
-- ALWAYS use horizontal layout (flowchart LR or graph LR) - NEVER use TD (top-down)
-- Use %%{{init: {{'theme':'neutral'}}}}%% for clean backgrounds
-- Add white arrow styling: %%{{init: {{'theme':'neutral', 'themeVariables': {{'lineColor': '#ffffff'}}}}}}%%
-- Apply color coding with classDef (success, error, warning, info, normal)
-- Use emoji icons: 🚀(start), ✅(success), 🚨(error), 🔄(retry), 📊(data), 🎯(core), 🧠(processing)
-- Keep diagrams wide (3.5:1 to 4:1 aspect ratio)
-- Structure: Entry → Processing → Decision → Output/Loop
-- **MEANINGFUL LABELS**: Each diagram MUST have descriptive labels that explain what it shows
-- **CONTEXT**: Create diagrams that directly relate to the topic with clear, context-specific labels
+**EXAMPLE 2 - Single Focused Flow (3-4 nodes max)**
+```mermaid
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🚀 Input Data"] -->|Process| B["🔄 Transform"]
+    B -->|Validate| C["✅ Output"]
 
-**CRITICAL DIAGRAM SYNTAX RULES:**
-1. **ALL labels with special characters MUST be quoted** - This is the #1 cause of parse errors
-   - Special chars include: [] () {} <> : = + - * /
-   - WRONG: A[dp[1]] or B[F(5)] or C[a: b] or D[x + y]
-   - RIGHT: A["dp[1]"] or B["F(5)"] or C["a: b"] or D["x + y"]
-   - If in doubt, QUOTE IT!
+    classDef input fill:#e2e3e5,stroke:#6c757d,stroke-width:2px,color:#383d41
+    classDef process fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef output fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
 
-2. **NEVER use reserved keywords** as classDef names or node IDs
-   - FORBIDDEN: end, start, subgraph, style, link, classDef, class
-   - Use: final, begin, group, styling, connector, styleDef, category
+    class A input
+    class B process
+    class C output
+```
 
-3. **FORBIDDEN in labels (edge or node)** - All cause parse errors:
-   - NO square brackets: [] - Use words "array", "index", or remove
-   - NO curly braces: {{}} - Use words or remove
-   - NO HTML tags: <br/> <strong> - Use plain text only
-   - NO unquoted parentheses: () in edge labels - Quote them
-   - WRONG: A -->|Array: []| B or B -->|Props: {{name}}| C or D["a<br/>b"]
-   - RIGHT: A -->|Empty array| B or B -->|"Props name"| C or D["a b"]
+**EXAMPLE 3 - Simple Before/After Comparison**
+```mermaid
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    Before["❌ Before: O(n²)<br/>100×100 = 10,000 ops"]
+    After["✅ After: O(n)<br/>100 + 100 = 200 ops"]
 
-4. **ALWAYS use horizontal layout LR** - Use flowchart LR or graph LR
+    Before -->|"Optimize"| After
+
+    classDef bad fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef good fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class Before bad
+    class After good
+```
+
+**CRITICAL RULES:**
+
+1. **Keep Labels SHORT** - Max 5-7 words per label
+   - Use emojis: 🚀 ✅ ❌ 🔄 📊 🎯 🧠
+   - Use line breaks with <br/> sparingly (max 2 breaks)
+   - WRONG: A["This is a very long label that explains too much and makes the diagram hard to read"]
+   - RIGHT: A["🚀 Input<br/>10 items"]
+
+2. **Multiple Diagrams Strategy** - Instead of ONE complex diagram:
+   - Create 2-3 simple diagrams showing different aspects
+   - Each diagram focuses on ONE concept
+   - Space them out with text explanations
+   - Example: First diagram shows concept, second shows example, third shows comparison
+
+3. **Subgraphs ONLY for Side-by-Side Comparison**:
+   - Use when comparing TWO things (old vs new, before vs after)
+   - Each subgraph should have 2-3 nodes MAX
+   - Connect subgraphs with ONE clear relationship arrow
+
+4. **AVOID Complex Nested Structures**:
+   - NO deeply nested subgraphs
+   - NO more than 6 nodes per diagram
+   - NO crossing arrows
+   - If it's getting complex, split into 2 diagrams
+
+5. **Color Coding** (use sparingly for emphasis):
+   - Green: Success, fast, good, new, optimized
+   - Red: Error, slow, bad, old, inefficient
+   - Yellow: Warning, processing, transforming
+   - Blue: Info, data, input, neutral
+   - Gray: Base, default, neutral
+
+6. **Quote ALL labels with special chars**:
+   - Special chars: [] () {} <> : = + - * /
+   - WRONG: A[dp[1]] or B[F(5)]
+   - RIGHT: A["dp[1]"] or B["F(5)"]
+
+7. **Horizontal layout ONLY**:
    - WRONG: flowchart TD
    - RIGHT: flowchart LR
 
-5. **EVERY classDef must have complete style definitions**
+8. **Complete ALL classDef**:
    - WRONG: classDef child
    - RIGHT: classDef child fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
-
-6. **Match class names exactly** - class statement must match classDef name
-   - WRONG: classDef start ... class A star
-   - RIGHT: classDef start ... class A start
-
-7. **Use double quotes for labels** - Single quotes can cause issues
-   - WRONG: A['label']
-   - RIGHT: A["label"]
 """)
 
     # Table examples

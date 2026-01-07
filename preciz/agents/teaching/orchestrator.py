@@ -130,13 +130,36 @@ class AppendTool:
         Returns:
             New line count in the document
         """
-        with open(self.output_file, "a") as f:
+        # Get current line count before append
+        before_count = len(self.output_file.read_text().split("\n")) if self.output_file.exists() else 0
+
+        # Verify file exists before appending
+        if not self.output_file.exists():
+            raise FileNotFoundError(f"Output file {self.output_file} disappeared before append!")
+
+        # Append content (use 'a' mode to append, not overwrite)
+        with open(self.output_file, "a", encoding="utf-8") as f:
             f.write(content)
             if not content.endswith("\n"):
                 f.write("\n")
             f.write("\n")  # Spacer between sections
 
-        return len(self.output_file.read_text().split("\n"))
+        # Get new line count after append
+        after_count = len(self.output_file.read_text().split("\n"))
+
+        # Debug: verify append actually worked
+        content_lines = len(content.split("\n"))
+        expected_count = before_count + content_lines + 2  # +2 for the extra newlines
+
+        if after_count < expected_count * 0.5:  # If significantly less than expected
+            # Something went wrong - file might have been truncated
+            raise IOError(
+                f"Append failed: expected ~{expected_count} lines, got {after_count}. "
+                f"Before: {before_count}, Content: {content_lines}, After: {after_count}. "
+                f"File may have been truncated or overwritten."
+            )
+
+        return after_count
 
     def get_line_count(self) -> int:
         """Get current line count of document."""

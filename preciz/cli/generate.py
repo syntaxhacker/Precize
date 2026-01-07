@@ -40,6 +40,7 @@ def print_usage():
     print("  --iter <n>        Max review iterations per block (default: 2)")
     print("  --gen-mode <mode> Generation mode (default: auto)")
     print("  --parts <n>       Number of parts for 'parts' mode (default: auto)")
+    print("  --approve-outline Prompt to approve outline before generation")
     print()
     print("Content Customization (optional flags, otherwise prompts interactively):")
     print("  --audience <level>     Target audience: beginner, intermediate, advanced")
@@ -60,14 +61,14 @@ def print_usage():
     print("Without customization flags, you'll be prompted interactively for preferences.")
 
 
-def parse_args(args: list[str]) -> tuple[str, str, int, int, str, int | None]:
+def parse_args(args: list[str]) -> tuple[str, str, int, int, str, int | None, bool]:
     """Parse command line arguments.
 
     Returns:
-        (topic, output, target_lines, max_iterations, gen_mode, num_parts)
+        (topic, output, target_lines, max_iterations, gen_mode, num_parts, approve_outline)
     """
     if len(args) < 2:
-        return None, None, 10000, 2, "auto", None
+        return None, None, 10000, 2, "auto", None, False
 
     topic = args[0]
     output = args[1]
@@ -75,6 +76,7 @@ def parse_args(args: list[str]) -> tuple[str, str, int, int, str, int | None]:
     max_iterations = 2
     gen_mode = "auto"
     num_parts = None  # None = auto-calculate from target_lines
+    approve_outline = False  # Default: auto-proceed
 
     i = 2
     while i < len(args):
@@ -90,10 +92,13 @@ def parse_args(args: list[str]) -> tuple[str, str, int, int, str, int | None]:
         elif args[i] == "--parts" and i + 1 < len(args):
             num_parts = int(args[i + 1])
             i += 2
+        elif args[i] == "--approve-outline":
+            approve_outline = True
+            i += 1
         else:
             i += 1
 
-    return topic, output, target_lines, max_iterations, gen_mode, num_parts
+    return topic, output, target_lines, max_iterations, gen_mode, num_parts, approve_outline
 
 
 def create_llm_todo_list(orchestrator, topic: str, target_lines: int, logger=None) -> list[BlockTask]:
@@ -189,11 +194,10 @@ Respond ONLY with the raw JSON object (no markdown code blocks).
             if match:
                 json_str = match.group(0)
 
-        # Strategy 3: Clean and parse
+        # Strategy 3: Parse JSON
         if json_str:
             try:
-                # Clean up newlines
-                json_str = json_str.replace("\n", " ")
+                # Parse JSON directly (preserves newlines in strings)
                 data = json.loads(json_str)
                 parsed_json = json.dumps(data, indent=2)
 
@@ -302,7 +306,7 @@ def main() -> int:
         return 0 if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help", "help") else 1
 
     args = sys.argv[1:]
-    topic, output, target_lines, max_iterations, gen_mode, num_parts = parse_args(args)
+    topic, output, target_lines, max_iterations, gen_mode, num_parts, approve_outline = parse_args(args)
 
     if topic is None:
         print_usage()
@@ -326,6 +330,9 @@ def main() -> int:
         max_iterations=max_iterations,
         num_parts=num_parts,
     )
+
+    # Get timestamp filename for log reference
+    timestamp_filename = logger.log_file.stem if hasattr(logger, 'log_file') else "preciz-latest"
 
     try:
         # Collect preferences (check for flags or prompt interactively)
@@ -426,6 +433,90 @@ def main() -> int:
                 logger.error("  ✗ No tasks created")
                 logger.error(f"  → LLM returned 0 sections. Check the log file for details.")
                 return 1
+
+            # Display outline and ask for confirmation
+            logger.info("")
+            logger.info(f"{'='*60}")
+            logger.info(f"  OUTLINE PREVIEW")
+            logger.info(f"{'='*60}")
+            logger.info("")
+            for i, task in enumerate(tasks, 1):
+                logger.info(f"  {i}. {task.title}")
+            logger.info("")
+            logger.info(f"Total: {len(tasks)} sections planned")
+            logger.info("")
+
+            # Ask for confirmation before proceeding
+            if approve_outline:
+                try:
+                    response = input("Proceed with this outline? [Y/n/edit]: ").strip().lower()
+
+                    if response == 'n':
+                        logger.info("Cancelled by user.")
+                        return 0
+                    elif response == 'edit':
+                        # Save outline to JSON file for editing
+                        outline_file = Path("outline.json")
+                        import json
+                        outline_data = {
+                            "title": topic,
+                            "sections": [
+                                {
+                                    "title": task.title,
+                                    "level": task.level,
+                                    "description": task.description,
+                                    "require_mermaid": task.require_mermaid,
+                                    "require_table": task.require_table,
+                                    "require_examples": task.require_examples
+                                }
+                                for task in tasks
+                            ]
+                        }
+                        outline_file.write_text(json.dumps(outline_data, indent=2))
+                        logger.info("")
+                        logger.success(f"✓ Outline saved to {outline_file}")
+                        logger.info("")
+                        logger.info("Edit the file to modify sections, then press Enter to continue...")
+                        logger.info("Press Ctrl+C to cancel")
+
+                        # Wait for user to edit and press Enter
+                        input("Press Enter when ready to proceed...")
+
+                        # Reload the outline from JSON
+                        try:
+                            modified_data = json.loads(outline_file.read_text())
+                            tasks = []
+                            for section in modified_data.get("sections", []):
+                                tasks.append(BlockTask(
+                                    title=section["title"],
+                                    description=section.get("description", ""),
+                                    level=section.get("level", 1),
+                                    require_mermaid=section.get("require_mermaid", False),
+                                    require_table=section.get("require_table", False),
+                                    require_examples=section.get("require_examples", True),
+                                ))
+                            logger.success(f"✓ Loaded {len(tasks)} sections from modified outline")
+                            logger.info("")
+                            logger.info("Modified outline:")
+                            for i, task in enumerate(tasks, 1):
+                                logger.info(f"  {i}. {task.title}")
+                            logger.info("")
+
+                            # Ask for final confirmation
+                            confirm = input("Proceed with modified outline? [Y/n]: ").strip().lower()
+                            if confirm == 'n':
+                                logger.info("Cancelled by user.")
+                                return 0
+                        except (json.JSONDecodeError, KeyError) as e:
+                            logger.error(f"✗ Failed to load modified outline: {e}")
+                            logger.info("Using original outline...")
+                    elif response not in ('', 'y', 'yes'):
+                        logger.info(f"Unknown response: {response}")
+                        logger.info("Proceeding with outline...")
+                except (EOFError, KeyboardInterrupt):
+                    logger.info("")
+                    logger.info("Cancelled by user.")
+                    return 0
 
             # Generate content
             from preciz.agents.teaching.orchestrator import AppendTool

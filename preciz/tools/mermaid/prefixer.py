@@ -45,14 +45,19 @@ def pre_fix_mermaid(code: str) -> str:
         # But NOT: A["already quoted"] --> B
         if '-->' in line and '[' in line:
             # Pattern: node identifier followed by [label with special chars]
-            # Special chars: [], (), {}, <>, :
-            pattern = r'(\w+)\[([^\]"\'\[]*[\[\]\(\)\{\}<>:][^\]"\'\]]*)\]'
+            # Special chars to trigger quoting: (), {}, <>, :, +, -, *, /, =
+            # Also check for nested brackets like [dp[1] (using [)
+            # NOTE: ] is NOT in special chars because it's the label delimiter
+            pattern = r'(\w+)\[([^\]"\']*)([\[\(\)\{\}<>:=+\-*/])([^\]"\']*)\]'
 
             def quote_label(match):
                 node_id = match.group(1)
-                label = match.group(2)
+                label_start = match.group(2)
+                special_char = match.group(3)
+                label_end = match.group(4)
+                label = label_start + special_char + label_end
                 # If already contains quotes, don't double-quote
-                if '"' not in label:
+                if '"' not in label and "'" not in label:
                     return f'{node_id}["{label}"]'
                 return match.group(0)
 
@@ -95,15 +100,34 @@ def should_apply_prefix(code: str) -> bool:
         True if pre-fix should be applied
     """
     # Check for unquoted special characters in node labels
-    if re.search(r'\w\[.*[\[\]\(\)\{\}<>:].*\]', code):
+    # Pattern: A[label with special chars] where special chars are: () {} <> : = + - * /
+    # Also check for nested brackets like A[dp[1]] which need quoting
+    # But NOT: A["already quoted"]
+    for line in code.split('\n'):
+        # Skip comments and empty lines
+        if not line or line.strip().startswith('%%'):
+            continue
+
+        # Check for node labels with special characters
+        # Pattern matches: A[anything with special chars]
+        # Excludes: A["quoted"]
+        matches = re.finditer(r'(\w+)\[([^\]]*)\]', line)
+        for match in matches:
+            label = match.group(2)
+            # If not already quoted (doesn't start with quote)
+            if not label.startswith('"') and not label.startswith("'"):
+                # Check for special chars: parentheses, braces, angle brackets, colon, equals, etc.
+                # Also check for nested brackets [inside]
+                if any(char in label for char in ['(', ')', '{', '}', '<', '>', ':', '=', '+', '-', '*', '/', '[']):
+                    return True
+
+    # Check for common typos (use word boundary to avoid matching 'classD' in 'classDef')
+    if re.search(r'\bclassD\b', code) or re.search(r'\bclassd\b', code):
         return True
 
-    # Check for common typos
-    if 'classD' in code or 'classd' in code:
-        return True
-
-    # Check for incomplete classDef
-    if re.search(r'^classDef\s+\w+\s*$', code, re.MULTILINE):
+    # Check for incomplete classDef (classDef name with no styles)
+    # Must be exactly "classDef name" at start of line (with optional whitespace)
+    if re.search(r'^\s*classDef\s+\w+\s*$', code, re.MULTILINE):
         return True
 
     return False
