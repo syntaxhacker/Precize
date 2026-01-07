@@ -3,9 +3,8 @@
 import sys
 from pathlib import Path
 
-from .config import Config
-from .llm import LLMClient
-from .mermaid_verifier import extract_mermaid_blocks, convert_mermaid_with_retry
+from preciz.core import Config, LLMClient
+from .verifier import extract_mermaid_blocks, convert_mermaid_with_retry
 
 
 def print_usage():
@@ -125,7 +124,7 @@ def main() -> int:
         # Try conversion
         if args["no_fix"]:
             # Single attempt, no fixing
-            from .mermaid_verifier import try_convert_mermaid
+            from .verifier import try_convert_mermaid
             success, error = try_convert_mermaid(block.code, output_path)
             if success:
                 success_count += 1

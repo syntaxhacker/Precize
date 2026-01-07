@@ -34,8 +34,8 @@ dev = [
 
 [project.scripts]
 preciz = "preciz.cli:main"
-preciz-generate = "preciz.content_cli:main"
-preciz-gen-long = "preciz.generate_cli:main"
+preciz-generate = "preciz.cli.content:main"
+preciz-gen-long = "preciz.cli.generate:main"
 
 [build-system]
 requires = ["setuptools>=61.0"]

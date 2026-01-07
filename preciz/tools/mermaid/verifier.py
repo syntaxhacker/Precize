@@ -5,7 +5,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from .llm import LLMClient, Message
+from preciz.core import LLMClient, Message
 
 
 @dataclass
@@ -103,7 +103,7 @@ def fix_mermaid_with_llm(
     Returns:
         Fixed mermaid code
     """
-    from .prompts.mermaid_fixer import build_fix_mermaid_prompt
+    from preciz.prompts.tools.mermaid import build_fix_mermaid_prompt
 
     prompt = build_fix_mermaid_prompt(broken_code, error, context)
 
@@ -209,7 +209,7 @@ def verify_and_convert_mermaid(
         output_path = images_dir_path / filename
 
         # Pre-fix common syntax errors before attempting conversion
-        from .mermaid_prefixer import pre_fix_mermaid
+        from .prefixer import pre_fix_mermaid
         code_to_convert = pre_fix_mermaid(block.code)
 
         # Check if pre-fix made changes

@@ -6,11 +6,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from .config import Config
-from .editor import Editor, EditOperation
-from .file_ops import read_file
-from .llm import LLMClient, Message
-from .prompts import agent as agent_prompts
+from preciz.core.config import Config
+from preciz.core.editor import Editor, EditOperation
+from preciz.core.file_ops import read_file
+from preciz.core.llm import LLMClient, Message
+from preciz._archive.prompts.agent import agent as agent_prompts
 
 
 @dataclass

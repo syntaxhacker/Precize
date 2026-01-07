@@ -16,11 +16,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from .agent import PrecizAgent
-from .config import Config
-from .file_ops import read_file, write_file
-from .llm import Message
-from .prompts import generator_v2 as gen_v2_prompts
+from preciz._archive.agent import PrecizAgent
+from preciz.core.config import Config
+from preciz.core.file_ops import read_file, write_file
+from preciz.core.llm import Message
+from preciz._archive.prompts.generator_v2 import generator_v2 as gen_v2_prompts
 
 
 @dataclass(frozen=True)

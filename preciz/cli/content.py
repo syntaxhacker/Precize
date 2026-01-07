@@ -3,7 +3,7 @@
 import sys
 from pathlib import Path
 
-from .generator import ContentGenerator, ContentSpec, generate_tutorial
+from preciz._archive.generator import ContentGenerator, ContentSpec, generate_tutorial
 
 
 def print_usage():

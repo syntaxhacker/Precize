@@ -5,11 +5,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from .agent import PrecizAgent
-from .config import Config
-from .file_ops import read_file, write_file
-from .llm import Message
-from .prompts import generator as gen_prompts
+from preciz._archive.agent import PrecizAgent
+from preciz.core.config import Config
+from preciz.core.file_ops import read_file, write_file
+from preciz.core.llm import Message
+from preciz._archive.prompts.generator import generator as gen_prompts
 
 # Re-export types from prompts for backward compatibility
 SectionBlock = gen_prompts.SectionBlock

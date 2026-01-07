@@ -19,9 +19,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
 
-from .config import Config
-from .llm import LLMClient, Message, LLMResponse
-from .prompts import orchestrator as orch_prompts
+from preciz.core import Config, LLMClient, Message, LLMResponse
+from preciz.prompts.teaching import orchestrator as orch_prompts
 from .preferences import ContentPreferences
 
 

@@ -1,6 +1,6 @@
 """Prompts for the orchestrator-based document generator."""
 
-from ...preferences import (
+from preciz.agents.teaching.preferences import (
     ContentPreferences,
     build_teaching_layers,
     format_preferences_for_prompt,

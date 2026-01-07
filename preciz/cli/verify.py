@@ -8,10 +8,10 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from preciz.editor import edit_file, Editor, EditOperation, EditError
-from preciz.file_ops import read_file, write_file
-from preciz.agent import PrecizAgent
-from preciz.config import Config
+from preciz.core.editor import edit_file, Editor, EditOperation, EditError
+from preciz.core.file_ops import read_file, write_file
+from preciz._archive.agent import PrecizAgent
+from preciz.core.config import Config
 
 
 def test_direct_edit():
@@ -197,7 +197,7 @@ def test_agent_with_mock():
     print("\n=== Test 6: Agent with Mocked LLM ===")
 
     from unittest.mock import patch, MagicMock
-    from preciz.llm import LLMResponse
+    from preciz.core.llm import LLMResponse
 
     with tempfile.NamedTemporaryFile(mode='w', suffix='.md', delete=False) as f:
         f.write("# Hello\n\nWorld world world.")
