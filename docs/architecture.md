@@ -1,35 +1,53 @@
 # Preciz Architecture
 
-Preciz uses a modular, tool-based architecture designed for scalability and precision.
+Preciz uses a modular, agent-based architecture with reusable tools.
 
 ## Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                         Preciz                               │
+│                                                               │
 │  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────┐ │
 │  │   Editor    │  │  Generator   │  │   Orchestrator      │ │
-│  │  (edit)     │  │  (generate)  │  │   (coordinate)      │ │
+│  │  (deprecated)│  │  (deprecated) │  │   (teaching agent)  │ │
 │  └─────────────┘  └──────────────┘  └─────────────────────┘ │
-│         │                  │                     │            │
-│         └──────────────────┴─────────────────────┘            │
-│                            │                                  │
-│                    ┌───────▼───────┐                         │
-│                    │    Config     │                         │
-│                    │  + File Ops   │                         │
-│                    │  + LLM Client │                         │
-│                    └───────────────┘                         │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Teaching Agent (agents/teaching/)        │   │
+│  │  - orchestrator.py (Document generation logic)       │   │
+│  │  - preferences.py (Content preferences)               │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │                  Tools (tools/)                       │   │
+│  │  ┌────────────┐  ┌─────────────┐  ┌──────────────┐  │   │
+│  │  │  Mermaid    │  │ Completion   │  │ (Future tools)│  │   │
+│  │  │  Tool       │  │  Checker     │  │              │  │   │
+│  │  └────────────┘  └─────────────┘  └──────────────┘  │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              Core Infrastructure (core/)               │   │
+│  │  - config.py    - llm.py      - logger.py           │   │
+│  │  - file_ops.py  - editor.py                         │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │              CLI Layer (cli/)                         │   │
+│  │  - generate.py  - content.py  - verify.py            │   │
+│  └──────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Core Components
 
-### 1. Config Module (`config.py`)
+### 1. Config Module (`core/config.py`)
 
 Configuration management using environment variables.
 
 ```python
-from preciz.config import Config
+from preciz.core.config import Config
 
 config = Config.from_env()
 # Supports: OpenRouter, OpenAI
@@ -41,50 +59,12 @@ config = Config.from_env()
 - OpenRouter and OpenAI support
 - Configurable timeouts and retries
 
-### 2. File Operations (`file_ops.py`)
-
-Safe file read/write operations with error handling.
-
-```python
-from preciz.file_ops import read_file, write_file
-
-content = read_file("file.md")
-write_file("output.md", content)
-```
-
-**Features:**
-- UTF-8 handling with BOM support
-- Automatic parent directory creation
-- Custom exceptions for error handling
-
-### 3. Editor (`editor.py`)
-
-Precise file editing using exact string matching.
-
-```python
-from preciz.editor import Editor, EditOperation
-
-editor = Editor("file.md")
-editor.apply_edit(EditOperation(
-    old_text="old",
-    new_text="new",
-    replace_all=False
-))
-editor.save()
-```
-
-**Key Design:**
-- **Exact string matching** - prevents accidental edits
-- **Ambiguity detection** - errors if old_text appears multiple times
-- **Multiple edits** - applies edits sequentially
-- **Revert capability** - reload from disk if needed
-
-### 4. LLM Client (`llm.py`)
+### 2. LLM Client (`core/llm.py`)
 
 Unified client for OpenAI/OpenRouter APIs.
 
 ```python
-from preciz.llm import LLMClient, Message
+from preciz.core import LLMClient, Message
 
 client = LLMClient(config)
 response = client.complete([
@@ -97,200 +77,253 @@ response = client.complete([
 - Token usage tracking
 - Configurable temperature/max_tokens
 
-### 5. Agent (`agent.py`)
+### 3. Logger (`core/logger.py`)
 
-Main agent coordinating LLM with file editing.
+Session-based logging with metadata tracking.
 
 ```python
-from preciz.agent import PrecizAgent
+from preciz.core import SessionLogger
 
-agent = PrecizAgent()
-agent.edit_file("Fix the typo", "file.md")
+logger = SessionLogger(topic="My Topic", output_file="out.md")
+with logger:
+    logger.info("Processing...")
+    logger.log_llm_request(...)
 ```
 
-**Workflow:**
-1. Read file content
-2. Send to LLM with instruction
-3. Parse LLM response into edit operations
-4. Apply edits using Editor
-5. Save file
+**Features:**
+- Automatic log file creation
+- LLM call tracking
+- Structured output with colors
 
-### 6. Orchestrator (`orchestrator.py`)
+### 4. Teaching Agent (`agents/teaching/`)
 
-**NEW**: Tool-based orchestrator for long document generation.
+Main agent for generating educational content.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    DocumentOrchestrator                      │
-│  - Maintains todo list of sections                          │
-│  - Coordinates tools in sequence                            │
-│  - Tracks progress (resumable!)                             │
-└─────────────────────────────────────────────────────────────┘
-         │              │              │              │
-         ▼              ▼              ▼              ▼
-    ┌────────┐    ┌────────┐    ┌────────┐    ┌────────┐
-    │GENERATE│    │ REVIEW │    │IMPROVE │    │ APPEND │
-    │  Tool  │    │  Tool  │    │  Tool  │    │  Tool  │
-    └────────┘    └────────┘    └────────┘    └────────┘
+DocumentOrchestrator
+├── GenerateTool - Create content blocks (100-200 lines)
+├── ReviewTool - Quality check against teaching standards
+├── ImproveTool - Fix issues based on feedback
+└── preferences.py - Content customization
 ```
 
 **Tools:**
 
 | Tool | Purpose |
 |------|---------|
-| `GenerateTool` | Generate a content block (100-200 lines) |
+| `GenerateTool` | Generate a content block |
 | `ReviewTool` | Review content against quality checklist |
 | `ImproveTool` | Improve content based on feedback |
-| `AppendTool` | Append content to document file |
+| `AppendTool` | Append content to document with validation |
 
-**State Management:**
+### 5. Mermaid Tool (`tools/mermaid/`)
+
+Extract, convert, and fix Mermaid diagrams.
 
 ```python
-@dataclass
-class OrchestrationState:
-    topic: str
-    output_file: str
-    target_lines: int
-    tasks: list[BlockTask]
-    current_task_index: int
-    total_lines: int
+from preciz.tools.mermaid import verify_and_convert_mermaid, pre_fix_mermaid
+
+# Convert mermaid blocks to PNG images
+content = verify_and_convert_mermaid(
+    content=markdown,
+    section_index=0,
+    section_title="My Section",
+    llm=llm_client
+)
+
+# Pre-fix common syntax errors
+fixed = pre_fix_mermaid(broken_mermaid_code)
 ```
 
-State can be saved/resumed for fault tolerance.
+**Components:**
+- `verifier.py` - Extract blocks, convert to PNG, replace with image refs
+- `prefixer.py` - Regex-based fixes for common syntax errors
+- `cli.py` - Standalone mermaid verification command
+
+### 6. Completion Checker Tool (`tools/completion/`)
+
+Detect incomplete sections in generated markdown.
+
+```python
+from preciz.tools.completion import detect_incomplete_sections
+
+issues = detect_incomplete_sections(markdown_content)
+```
 
 ## File Structure
 
 ```
 preciz/
-├── preciz/
-│   ├── __init__.py         # Package init
-│   ├── config.py           # Configuration (26 lines)
-│   ├── file_ops.py         # File I/O (37 lines)
-│   ├── editor.py           # Edit engine (49 lines)
-│   ├── llm.py              # LLM client (37 lines)
-│   ├── agent.py            # Edit agent (57 lines)
-│   ├── cli.py              # Edit CLI (52 lines)
-│   ├── orchestrator.py     # NEW: Orchestrator (400+ lines)
-│   │   ├── GenerateTool    # Block generation
-│   │   ├── ReviewTool      # Quality review
-│   │   ├── ImproveTool     # Content improvement
-│   │   ├── AppendTool      # File appending
-│   │   └── DocumentOrchestrator  # Coordinator
-│   ├── generator_v2.py     # Block-based generator
-│   ├── content_cli.py      # Original generator CLI
-│   └── generate_cli.py     # Long doc CLI
-├── tests/                  # Comprehensive tests
-│   ├── test_editor.py
-│   ├── test_file_ops.py
-│   ├── test_llm.py
-│   ├── test_agent.py
-│   ├── test_generator_v2.py
-│   └── ...
-├── docs/                   # This documentation
-├── output/                 # Generated documents
-└── README.md
+├── agents/                    # Agent implementations
+│   ├── teaching/              # Teaching/Content Generation Agent
+│   │   ├── orchestrator.py     # Main document generation
+│   │   └── preferences.py      # Content preferences
+│   └── __init__.py
+│
+├── tools/                     # Reusable tools
+│   ├── mermaid/               # Mermaid diagram tool
+│   │   ├── verifier.py        # Extract & convert diagrams
+│   │   ├── prefixer.py        # Pre-fix common errors
+│   │   └── cli.py             # Standalone CLI
+│   ├── completion/            # Content validation
+│   │   ├── checker.py         # Incomplete section detection
+│   │   └── cli.py             # Standalone CLI
+│   └── __init__.py
+│
+├── core/                      # Shared infrastructure
+│   ├── config.py              # Configuration
+│   ├── llm.py                 # LLM client
+│   ├── logger.py              # Logging utilities
+│   ├── file_ops.py            # File operations
+│   └── editor.py              # File editing
+│
+├── cli/                       # Top-level CLI commands
+│   ├── generate.py            # preciz-gen-long
+│   ├── content.py             # preciz-generate
+│   └── verify.py              # Verification tests
+│
+├── prompts/                   # Prompts organized by agent/tool
+│   ├── teaching/              # Teaching agent prompts
+│   └── tools/                 # Tool-specific prompts
+│
+├── _archive/                  # Legacy files (deprecated)
+│   ├── agent.py
+│   ├── generator.py
+│   └── generator_v2.py
+│
+└── __init__.py
 ```
 
 ## Design Principles
 
-### 1. Modularity
-Each component has a single, well-defined responsibility.
+### 1. Agent-Based Architecture
 
-### 2. Immutability
-Configuration and data structures use frozen dataclasses.
+- **Agents**: High-level coordinators (teaching, future agents)
+- **Tools**: Reusable components that any agent can use
+- **Core**: Shared infrastructure
 
-### 3. Error Handling
-Custom exceptions (`FileError`, `EditError`) for clear error messages.
+### 2. Tool Reusability
 
-### 4. Testability
-100% mockable - all LLM calls can be stubbed.
+Tools are independent and can be used by any agent:
+- Mermaid tool can be used by teaching agent or future agents
+- Completion checker can validate any markdown content
 
-### 5. Scalability
-Block-based approach allows arbitrary document lengths.
+### 3. Clear Separation
+
+- **Agents** orchestrate but don't implement low-level logic
+- **Tools** implement specific functionality
+- **Core** provides foundational services
+
+### 4. Progressive Teaching
+
+The teaching agent follows a specific pedagogical model:
+- Foundation → Concepts → Implementation → Mastery
+- Zero-to-expert buildup
+- Analogies before technical terms
 
 ## Data Flow
 
-### Editing Flow
+### Content Generation Flow
 
 ```
-User Input → Agent → LLM → Parse Edits → Editor → File
-                     ↑                   │
-                     └──── Error ←────────┘
+Topic → Teaching Agent
+         ↓
+    Create Outline (LLM)
+         ↓
+    [User Approval with --approve-outline]
+         ↓
+    For Each Section:
+      GenerateTool → LLM → Content (100-200 lines)
+           ↓
+      ReviewTool → LLM → Feedback
+           ↓
+      (if issues) ImproveTool → LLM → Improved Content
+           ↓
+      Mermaid Tool → Convert diagrams to PNG
+           ↓
+      AppendTool → File (with validation)
+           ↓
+      Update Progress
 ```
 
-### Generation Flow
+### Diagram Processing Flow
 
 ```
-Topic → Orchestrator → Create Todo List
-                       ↓
-For Each Task:
-  GenerateTool → LLM → Content Block
+Markdown Content
        ↓
-  ReviewTool → LLM → Feedback
+Extract Mermaid Blocks
        ↓
-  (if needed) ImproveTool → LLM → Improved Content
+Pre-fix Common Errors (regex)
        ↓
-  AppendTool → File
+Convert to PNG (mmdc)
        ↓
-  Update Progress
+    Success?
+       ├─ Yes → Save PNG + .mmd source → Replace block with image ref
+       └─ No → LLM Fix (up to 3 retries) → Try again
 ```
 
 ## Key Design Decisions
 
-### Why Exact String Matching for Editing?
+### Why Agent-Based Architecture?
 
-- **Precision**: No ambiguity about what changes
-- **Safety**: Can't accidentally change wrong occurrences
-- **Verifiable**: Edits can be checked before applying
+- **Scalability**: Easy to add new agents (code review, testing, etc.)
+- **Reusability**: Tools can be shared across agents
+- **Maintainability**: Clear boundaries between components
 
-### Why Orchestrator Pattern for Generation?
+### Why Pre-Fixer Before LLM Fix?
 
-- **Scalability**: Process any length document
-- **Resumability**: Save state, resume if interrupted
-- **Tool Separation**: Each tool does one thing well
-- **Progress Tracking**: Always know where you are
+- **Cost**: Regex is free, LLM calls cost money
+- **Speed**: Regex is instant, LLM has latency
+- **Reliability**: Consistent fixes for known patterns
+- ~80% of issues caught by pre-fixer
 
-### Why Frozen Dataclasses?
+### Why Save .mmd Source Files?
 
-- **Immutability**: Prevent accidental modifications
-- **Clarity**: Clear what data is passed
-- **Type Safety**: Pydantic validation built-in
+- **Debugging**: Can inspect what code was actually generated
+- **Reusability**: Can edit and reconvert manually
+- **Learning**: See working mermaid examples
+- **Transparency**: Full visibility into fixes applied
 
 ## Performance Characteristics
 
 | Operation | Time | Notes |
 |-----------|------|-------|
-| File Read | O(n) | n = file size |
-| File Write | O(n) | n = content size |
-| Single Edit | O(n) | Must scan file for match |
-| LLM Call | O(1) | Depends on API |
-| Block Generate | O(1) | 100-200 lines fixed |
-| Full Document | O(k) | k = number of blocks |
+| Pre-fix mermaid | O(n) | n = code length, regex is fast |
+| LLM fix attempt | O(1) | Depends on API latency |
+| mmdc conversion | O(1) | Depends on diagram complexity |
+| Block generation | O(1) | 100-200 lines fixed |
+| Full document | O(k) | k = number of sections |
 
 ## Extension Points
 
 ### Adding New Tools
 
-```python
-class MyCustomTool:
-    def __init__(self, llm: LLMClient):
-        self.llm = llm
+Create a new directory under `tools/`:
 
-    def process(self, data: str) -> str:
-        # Custom logic
-        return result
+```python
+# tools/mytool/__init__.py
+from .processor import process_data
+
+__all__ = ["process_data"]
 ```
 
-### Adding New LLM Providers
+### Adding New Agents
 
-Extend `Config.from_env()` to support new providers.
+Create a new directory under `agents/`:
 
-### Custom Review Criteria
+```python
+# agents/myagent/__init__.py
+from .coordinator import MyAgent
 
-Modify `QualityChecklist` in `generator.py`.
+__all__ = ["MyAgent"]
+```
+
+### Custom Prompts
+
+Edit prompt files in `prompts/teaching/` or `prompts/tools/`.
 
 ## See Also
 
-- [Orchestrator Pattern](orchestrator.md)
+- [CLI Reference](cli.md)
+- [Mermaid Documentation](mermaid.md)
 - [API Reference](api.md)
-- [Extending Preciz](extending.md)

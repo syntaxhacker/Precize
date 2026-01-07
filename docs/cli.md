@@ -88,6 +88,7 @@ Creates a detailed outline, then generates each section using the orchestrator p
 | `--iter <n>` | Max review iterations per block | 2 |
 | `--gen-mode <mode>` | Generation mode (auto, llm, parts, custom) | auto |
 | `--parts <n>` | Number of parts for 'parts' mode (overrides auto-calc) | auto |
+| `--approve-outline` | Prompt to approve outline before generation | false |
 | `-h, --help` | Show help message | |
 
 ### Content Customization
@@ -104,6 +105,64 @@ Creates a detailed outline, then generates each section using the orchestrator p
 | `--code-examples <n>` | Number of code examples per section | 3 (default) |
 
 **Note**: Without customization flags, the CLI will prompt you interactively for preferences.
+
+### Outline Approval
+
+When using `--approve-outline`, you can review and edit the outline before generation begins:
+
+```bash
+$ preciz-gen-long "Deep Learning" dl.md --approve-outline
+
+======================================================================
+  LLM created 25 sections
+======================================================================
+
+======================================================================
+  OUTLINE PREVIEW
+======================================================================
+
+  1. Foundations: Neural Networks from Scratch
+  2. The Perceptron: Building Block of Deep Learning
+  3. Activation Functions: Bringing Non-Linearity
+  ...
+  25. Production Deployment: Model Serving
+
+Total: 25 sections planned
+
+Proceed with this outline? [Y/n/edit]: edit
+
+✓ Outline saved to outline.json
+
+Edit the file to modify sections, then press Enter to continue...
+Press Ctrl+C to cancel
+```
+
+**Edit Workflow:**
+
+1. Type `edit` to save the outline to `outline.json`
+2. Open `outline.json` in your editor
+3. Modify sections (add, remove, reorder, change titles)
+4. Save and close the file
+5. Press Enter in the terminal
+6. Confirm the modified outline
+
+**Example `outline.json`:**
+
+```json
+{
+  "title": "Deep Learning",
+  "sections": [
+    {
+      "title": "Foundations: Neural Networks from Scratch",
+      "level": 1,
+      "description": "Build intuition before math",
+      "require_mermaid": true,
+      "require_table": false,
+      "require_examples": true
+    }
+  ]
+}
+```
 
 ### Generation Modes
 
