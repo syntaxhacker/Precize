@@ -1,0 +1,29 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚀 Start: Need 27¢"] --> B["🎯 Check: Use 1¢?"]
+    B --> C["📊 Then need 26¢"]
+    B --> D["🎯 Check: Use 5¢?"]
+    D --> E["📊 Then need 22¢"]
+    B --> F["🎯 Check: Use 10¢?"]
+    F --> G["📊 Then need 17¢"]
+    B --> H["🎯 Check: Use 25¢?"]
+    H --> I["📊 Then need 2¢"]
+
+    C --> J["🧠 Recursive Solution"]
+    E --> J
+    G --> J
+    I --> J
+
+    J --> K["✅ Minimum of all paths"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef decision fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef data fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef processing fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B,D,F,H decision
+    class C,E,G,I data
+    class J processing
+    class K success

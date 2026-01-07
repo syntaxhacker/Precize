@@ -1,0 +1,20 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚀 Start: Create dp[0..5]"] -->|Initialize| B["📊 dp[1]=1, dp[2]=1"]
+    B -->|Loop i=3| C["🧠 Calculate dp[3] = dp[2] + dp[1]"]
+    C -->|Loop i=4| D["🧠 Calculate dp[4] = dp[3] + dp[2]"]
+    D -->|Loop i=5| E["🎯 Calculate dp[5] = dp[4] + dp[3]"]
+    E -->|Return| F["✅ Final Answer: dp[5] = 5"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef data fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef process fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef core fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B data
+    class C process
+    class D process
+    class E core
+    class F success

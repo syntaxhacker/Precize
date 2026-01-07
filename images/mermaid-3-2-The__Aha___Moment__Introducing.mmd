@@ -1,0 +1,20 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#000'}}}%%
+flowchart TD
+    Start["fib(4)"] --> A["fib(3)"]
+    Start --> B["fib(2)"]
+
+    A --> C["fib(2)"]
+    A --> D["fib(1)"]
+
+    B -->|"Saved to Cache"| Memo1["fib(2) = 1"]
+
+    C -->|"Cache Hit!"| Memo2["Uses fib(2)"]
+    D -->|"Cache Hit!"| Memo3["Uses fib(1)"]
+
+    subgraph "Cache Storage"
+        Memo1
+        Memo3
+    end
+
+    classDef success fill:#d4edda,stroke:#28a745
+    class Memo1,Memo2,Memo3,Memo4 success

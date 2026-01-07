@@ -1,0 +1,12 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🔍 Small Input Signal] -->|Controls| B[🎛️ Transistor in Active Mode"]
+    B -->|Amplifies to| C[📊 Larger Output Signal]
+
+    classDef input fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef active fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef output fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px,color:#0c5460
+
+    class A input
+    class B active
+    class C output

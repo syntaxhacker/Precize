@@ -1,0 +1,22 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#333', 'edgeLabelBackground':'#fff'}}}%%
+graph TD
+    Start((Start)) --> ItemA{Item A?}
+
+    ItemA -- Take A (W:2, V:10) --> ItemB_TakeA{Item B?}
+    ItemA -- Leave A (W:0, V:0) --> ItemB_LeaveA{Item B?}
+
+    ItemB_TakeA -- Take B (W:5, V:25) --> Leaf1["Leaf: W=5, V=25"]
+    ItemB_TakeA -- Leave B (W:2, V:10) --> ItemC_TakeA{Item C?}
+
+    ItemB_LeaveA -- Take B (W:3, V:15) --> ItemC_LeaveA{Item C?}
+    ItemB_LeaveA -- Leave B (W:0, V:0) --> ItemC_LeaveA
+
+    ItemC_TakeA -- Take C (W:6, V=30) --> Leaf2["Leaf: W=6 (Over!)"]
+    ItemC_TakeA -- Leave C (W:2, V=10) --> Leaf3["Leaf: W=2, V=10"]
+
+    ItemC_LeaveA -- Take C (W:7, V=35) --> Leaf4["Leaf: W=7 (Over!)"]
+    ItemC_LeaveA -- Leave C (W:0, V=0) --> Leaf5["Leaf: W=0, V=0"]
+
+    style Leaf2 fill:#f8d7da,stroke:#dc3545
+    style Leaf4 fill:#f8d7da,stroke:#dc3545
+    style Leaf1 fill:#d4edda,stroke:#28a745

@@ -1,0 +1,13 @@
+flowchart LR
+    A["Emitter<br/>N-type<br/>Electron Source] -->|Forward Bias<br/>Emits Electrons| B[Base<br/>P-type<br/>Thin Control Gate"]
+    B -->|Electrons Pass Through<br/>Very Quickly| C["Collector<br/>N-type<br/>Electron Collector"]
+
+    style A fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style B fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style C fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+
+    D["Small Base Current<br/>Ib = 10μA"] --> E{Base Voltage<br/>Applied}
+    E -->|Controls| F["Large Collector Current<br/>Ic = 1mA"]
+
+    style D fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style F fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px

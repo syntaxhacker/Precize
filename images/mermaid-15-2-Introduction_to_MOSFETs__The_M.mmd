@@ -1,0 +1,18 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🔋 No Gate Voltage"] -->|Electric Field OFF| B["🚫 Channel Blocked"]
+    C["🔋 +V Gate Voltage"] -->|Electric Field ON| D["✅ Channel Opens"]
+    B --> E["No Current Flow"]
+    D --> F["Current Flows S→D"]
+
+    classDef off fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef on fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef block fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef open fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+
+    class A off
+    class B block
+    class C on
+    class D open
+    class E off
+    class F on

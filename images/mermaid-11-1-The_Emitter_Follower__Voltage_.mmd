@@ -1,0 +1,11 @@
+graph TD
+    VCC["Vcc (+V)"] --> R["R (Load Resistor)"]
+    R --> E["Emitter (Output)"]
+    B["Base (Input)"] --> T["NPN Transistor"]
+    T --> E
+    E --> GND["Ground"]
+    T --> C["Collector"]
+    C --> VCC
+
+    classDef component fill:#f9f,stroke:#333,stroke-width:2px
+    class VCC,R,B,E,GND,C component

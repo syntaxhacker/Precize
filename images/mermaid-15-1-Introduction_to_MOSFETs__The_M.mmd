@@ -1,0 +1,15 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚗 Cars waiting (No Current)"] -->|Apply Voltage| B["⚡ Gate Signal"]
+    B -->|Creates Electric Field| C["🌉 Drawbridge Rises"]
+    C -->|Allows Flow| D["🚗 Traffic Moves (Current Flows)"]
+
+    classDef waiting fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef signal fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef action fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef result fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A waiting
+    class B signal
+    class C action
+    class D result

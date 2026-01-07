@@ -1,0 +1,20 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart TD
+    A["Start: n=5"] --> B{"n <= 1?"}
+    B -->|Yes| C["Return n"]
+    B -->|No| D["Check memo[n]"]
+    D --> E{"Exists?"}
+    E -->|Yes| F["Return memo[n]"]
+    E -->|No| G["Compute: n + dp(n-1)"]
+    G --> H["Store in memo[n]"]
+    H --> I["Return result"]
+
+    style A fill:#fff3cd,stroke:#ffc107
+    style B fill:#cce5ff,stroke:#0066cc
+    style C fill:#d4edda,stroke:#28a745
+    style D fill:#cce5ff,stroke:#0066cc
+    style E fill:#cce5ff,stroke:#0066cc
+    style F fill:#d4edda,stroke:#28a745
+    style G fill:#cce5ff,stroke:#0066cc
+    style H fill:#cce5ff,stroke:#0066cc
+    style I fill:#d4edda,stroke:#28a745

@@ -1,0 +1,7 @@
+flowchart TD
+    Start([Start Loop]) --> Check[Check Button State]
+    Check -- Button Pressed? --> TurnOn["Set Pin HIGH<br/>Transistor ON"]
+    Check -- Not Pressed --> TurnOff["Set Pin LOW<br/>Transistor OFF"]
+    TurnOn --> Wait[Wait 100ms]
+    TurnOff --> Wait
+    Wait --> Check

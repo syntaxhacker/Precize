@@ -1,0 +1,11 @@
+graph LR
+    subgraph Vacuum Tube
+        A["Power Supply<br/>+ Voltage] -->|Attracts| C[Anode Plate"]
+        B["Cathode<br/>Heated Wire"] -->|Emits Electrons| C
+        G["Control Grid<br/>Small Signal"] -->|Regulates Flow| C
+        C -->|Electrons Flow| D[Output Current]
+    end
+
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style G fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#bfb,stroke:#333,stroke-width:2px

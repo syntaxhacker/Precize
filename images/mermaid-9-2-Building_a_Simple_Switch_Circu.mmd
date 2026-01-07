@@ -1,0 +1,47 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    subgraph Microcontroller ["Microcontroller (Arduino)"]
+        MCU[Pin 9<br/>Signal]
+    end
+
+    subgraph Transistor ["NPN Transistor (2N2222)"]
+        B[Base<br/>Listener]
+        C[Collector<br/>Switch Input]
+        E[Emitter<br/>Switch Output]
+    end
+
+    subgraph Load ["Load Circuit"]
+        BatExt[9V Battery<br/>External Source]
+        ResLED[330Ω Resistor]
+        LED[LED]
+    end
+
+    subgraph Ground ["Ground Path"]
+        GND[Ground]
+    end
+
+    %% Signal Path
+    MCU -- "Small Signal<br/>(220Ω Resistor)" --> B
+
+    %% Transistor Activation
+    B -- "Activates Path" --> C
+
+    %% Power Flow
+    BatExt -- "Power In" --> ResLED
+    ResLED -- "Limited Current" --> LED
+    LED -- "Collector" --> C
+    C -- "Emitter" --> E
+
+    %% Return Path
+    E -- "Return to" --> GND
+
+    %% Styling
+    classDef micro fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef trans fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef power fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef gnd fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+
+    class MCU micro
+    class B,C,E trans
+    class BatExt,ResLED,LED power
+    class GND gnd

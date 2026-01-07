@@ -1,0 +1,85 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#000', 'edgeLabelBackground':'#fff'}}}%%
+graph TD
+    subgraph "Knapsack Decision Matrix"
+        direction LR
+
+        subgraph "Row Labels"
+            R0["No Items"]
+            R1["Item 1: Boots (2lb, $50)"]
+            R2["Item 2: Water (1lb, $10)"]
+            R3["Item 3: Camera (1lb, $40)"]
+        end
+
+        subgraph "Capacity 0"
+            C0R0["0"]
+            C0R1["0"]
+            C0R2["0"]
+            C0R3["0"]
+        end
+
+        subgraph "Capacity 1"
+            C1R0["0"]
+            C1R1["0"]
+            C1R2["10"]
+            C1R3["10"]
+        end
+
+        subgraph "Capacity 2"
+            C2R0["0"]
+            C2R1["50"]
+            C2R2["50"]
+            C2R3["50"]
+        end
+
+        subgraph "Capacity 3"
+            C3R0["0"]
+            C3R1["50"]
+            C3R2["60"]
+            C3R3["90"]
+        end
+
+        R0 --> C0R0
+        R0 --> C1R0
+        R0 --> C2R0
+        R0 --> C3R0
+
+        R1 --> C0R1
+        R1 --> C1R1
+        R1 --> C2R1
+        R1 --> C3R1
+
+        R2 --> C0R2
+        R2 --> C1R2
+        R2 --> C2R2
+        R2 --> C3R2
+
+        R3 --> C0R3
+        R3 --> C1R3
+        R3 --> C2R3
+        R3 --> C3R3
+    end
+
+    style R0 fill:#e3f2fd,stroke:#1976d2
+    style R1 fill:#e8f5e9,stroke:#388e3c
+    style R2 fill:#fff3e0,stroke:#f57c00
+    style R3 fill:#fce4ec,stroke:#c2185b
+
+    style C0R0 fill:#f5f5f5
+    style C0R1 fill:#f5f5f5
+    style C0R2 fill:#f5f5f5
+    style C0R3 fill:#f5f5f5
+
+    style C1R0 fill:#f5f5f5
+    style C1R1 fill:#f5f5f5
+    style C1R2 fill:#e8f5e9
+    style C1R3 fill:#e8f5e9
+
+    style C2R0 fill:#f5f5f5
+    style C2R1 fill:#e8f5e9
+    style C2R2 fill:#e8f5e9
+    style C2R3 fill:#e8f5e9
+
+    style C3R0 fill:#f5f5f5
+    style C3R1 fill:#e8f5e9
+    style C3R2 fill:#fff3e0
+    style C3R3 fill:#fce4ec

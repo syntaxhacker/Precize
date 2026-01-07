@@ -1,0 +1,15 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🔄 Start: 2D Table (Items × Capacity)"] -->|We realize we only need| B["📊 Previous Row"]
+    B -->|To compute| C["🎯 Current Row"]
+    C -->|But we can reuse space!| D["💾 Single 1D Array"]
+    D -->|Process right-to-left| E["✅ Optimized Solution"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef data fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef process fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B,C data
+    class D,E process

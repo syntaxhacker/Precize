@@ -1,0 +1,27 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+graph LR
+    subgraph "Arduino"
+        A[Digital Pin 9]
+    end
+
+    subgraph "Transistor Circuit"
+        B["Base] --> C[Collector"]
+        C --> D[Emitter]
+        D --> E[Ground]
+    end
+
+    subgraph "Load"
+        F[LED + Resistor]
+    end
+
+    A -->|Control Signal| B
+    C -->|Power Flow| F
+    F -->|Returns| E
+
+    classDef micro fill:#0066cc,stroke:#004499,stroke-width:2px,color:white
+    classDef transistor fill:#ffc107,stroke:#cc9900,stroke-width:2px,color:black
+    classDef load fill:#17a2b8,stroke:#0d6efd,stroke-width:2px,color:white
+
+    class A micro
+    class B,C,D,E transistor
+    class F load

@@ -1,0 +1,19 @@
+graph LR
+    subgraph "Power Supply"
+        VCC(5V)
+        GND(GND)
+    end
+
+    subgraph "Load Section"
+        R[Resistor 150Ω]
+        LED[LED]
+    end
+
+    VCC --> R
+    R --> LED
+    LED --> GND
+
+    style VCC fill:#d4edda,stroke:#155724
+    style GND fill:#f8d7da,stroke:#721c24
+    style R fill:#fff3cd,stroke:#856404
+    style LED fill:#cce5ff,stroke:#004085

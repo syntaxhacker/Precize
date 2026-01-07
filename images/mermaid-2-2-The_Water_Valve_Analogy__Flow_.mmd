@@ -1,0 +1,19 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart TD
+    subgraph S1 [State 1: OFF]
+        A1["Valve: CLOSED"] --> B1["Water: BLOCKED"]
+        C1["Switch: OFF"] --> D1["Current: 0mA"]
+    end
+
+    subgraph S2 [State 2: ON]
+        A2["Valve: OPEN"] --> B2["Water: FULL FLOW"]
+        C2["Switch: ON"] --> D2["Current: MAX"]
+    end
+
+    subgraph S3 [State 3: ACTIVE]
+        A3["Valve: PARTIAL"] --> B3["Water: CONTROLLED"]
+        C3["Switch: ACTIVE"] --> D3["Current: VARIABLE"]
+    end
+
+    classDef state fill:#f8f9fa,stroke:#6c757d,stroke-width:2px
+    class S1,S2,S3 state

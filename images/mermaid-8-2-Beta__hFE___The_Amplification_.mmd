@@ -1,0 +1,12 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+graph LR
+    A["🔧 Small Switch<br/>0.5 mA"] -->|connects to| B["🧠 Base<br/>of Transistor"]
+    B -->|amplifies by β=100| C["⚡ Motor<br/>50 mA"]
+
+    classDef input fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef process fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef output fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A input
+    class B process
+    class C output

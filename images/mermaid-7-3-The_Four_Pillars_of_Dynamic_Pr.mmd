@@ -1,0 +1,14 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart TD
+    A["dp[3]"] --> B["dp[2]"]
+    A --> C["dp[1]"]
+    B --> D["dp[1]"]
+    B --> E["dp[0]"]
+    C --> F["dp[0]"]
+
+    style A fill:#d4edda,stroke:#28a745
+    style B fill:#cce5ff,stroke:#0066cc
+    style C fill:#cce5ff,stroke:#0066cc
+    style D fill:#fff3cd,stroke:#ffc107
+    style E fill:#fff3cd,stroke:#ffc107
+    style F fill:#fff3cd,stroke:#ffc107

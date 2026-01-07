@@ -1,0 +1,21 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+graph TD
+    VCC["+Vcc] --> RC[Collector Resistor<br/>Rc"]
+    RC --> COL[Collector]
+    COL --> OUTPUT["Output<br/>Vout"]
+    BASE["Base] --> RB[Base Resistor<br/>Rb"]
+    RB --> INPUT["Input<br/>Vin"]
+    COL --> TRANS["2N3904<br/>NPN"]
+    TRANS --> EMIT[Emitter]
+    EMIT --> RE["Emitter Resistor<br/>Re"]
+    EMIT --> GND[Ground]
+
+    classDef power fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef component fill:#d1ecf1,stroke:#0c5460,stroke-width:2px,color:#004085
+    classDef node fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef gnd fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class VCC power
+    class RC,TRANS,RB,RE component
+    class BASE,COL,EMIT,OUTPUT,INPUT node
+    class GND gnd

@@ -1,0 +1,17 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#000'}}}%%
+flowchart TD
+    Start["fib(4)"] --> A["fib(3)"]
+    Start --> B["fib(2)"]
+
+    A --> C["fib(2)"]
+    A --> D["fib(1)"]
+
+    B --> E["fib(1)"]
+    B --> F["fib(0)"]
+
+    C --> G["fib(1)"]
+    C --> H["fib(0)"]
+
+    %% Highlight the duplicates
+    classDef duplicate fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+    class B,C,D,E,G duplicate

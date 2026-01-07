@@ -1,0 +1,20 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🎯 Original Problem<br/>Reach step 100"] -->|Break into| B["📊 Subproblem 1<br/>Reach step 1"]
+    A -->|Break into| C["📊 Subproblem 2<br/>Reach step 2"]
+    A -->|Break into| D["📊 Subproblem 3<br/>Reach step 3"]
+    B --> E["✅ Solution builds up"]
+    C --> E
+    D --> E
+    E --> F["🎯 Final Solution<br/>Reach step 100"]
+
+    classDef target fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef subproblem fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A target
+    class B subproblem
+    class C subproblem
+    class D subproblem
+    class E success
+    class F target

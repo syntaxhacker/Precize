@@ -1,0 +1,19 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🎯 Goal: Calculate F(5)"] --> B["📝 Create table: table[0..5]"]
+    B --> C["✅ Fill base: table[0]=0, table[1]=1"]
+    C --> D["🔄 Loop from 2 to 5"]
+    D --> E["table[2] = table[1] + table[0]"]
+    E --> F["table[3] = table[2] + table[1]"]
+    F --> G["table[4] = table[3] + table[2]"]
+    G --> H["table[5] = table[4] + table[3]"]
+    H --> I["✅ Result: table[5]"]
+    style A fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    style B fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    style C fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    style D fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    style E fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    style F fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    style G fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    style H fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    style I fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724

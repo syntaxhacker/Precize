@@ -1,0 +1,18 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚀 Start: Empty Strings"] -->|Add 'A'| B["📊 Build DP Table"]
+    B -->|Fill: LCS lengths| C["🎯 Final Answer: 2"]
+    C -->|Now what?| D["🔍 Backtrack Path"]
+    D -->|Trace choices| E["✅ Reconstruct: 'AC'"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef data fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef core fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef process fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B data
+    class C core
+    class D process
+    class E success

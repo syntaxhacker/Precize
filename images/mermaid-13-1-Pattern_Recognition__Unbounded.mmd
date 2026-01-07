@@ -1,0 +1,21 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚀 Start: Capacity 5"] -->|Item weight 2, value 3| B["🎯 Decision Point"]
+
+    B -->|"0/1: Use once?"| C1["📊 dp[5] = max(3 + dp[3], dp[5])"]
+    B -->|"Unbounded: Use multiple?"| C2["🔄 dp[5] = max(3 + dp[3], dp[5])"]
+
+    C1 --> D1["✅ Can't reuse item"]
+    C2 --> D2["✅ Can reuse item"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef decision fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef process fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B decision
+    class C1 process
+    class C2 process
+    class D1 success
+    class D2 success

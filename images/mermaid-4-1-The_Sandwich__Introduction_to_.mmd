@@ -1,0 +1,14 @@
+graph TD
+    subgraph N-Type Silicon [N-Type: Excess Electrons]
+        direction LR
+        Si1[Silicon Atom] -- "Covalent Bond" --> Si2[Silicon Atom]
+        P[Phosphorus Atom] -- "Extra Electron (Free)" --> FreeE((e⁻))
+        Si1 -- "Covalent Bond" --> P
+    end
+
+    subgraph P-Type Silicon [P-Type: Holes]
+        direction LR
+        SiA[Silicon Atom] -- "Covalent Bond" --> SiB[Silicon Atom]
+        B[Boron Atom] -- "Missing Electron" --> H((Hole))
+        SiA -- "Covalent Bond" --> B
+    end

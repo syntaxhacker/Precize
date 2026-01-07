@@ -1,0 +1,29 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+stateDiagram-v2
+    direction LR
+
+    [*] --> Cutoff: Low control voltage
+    Cutoff --> Active: Voltage increases
+    Active --> Saturation: Voltage increases further
+    Saturation --> Active: Voltage decreases
+    Active --> Cutoff: Voltage decreases further
+
+    state Cutoff {
+        [*] --> Off: V_control < V_threshold
+    }
+
+    state Active {
+        [*] --> Amplifying: V_threshold < V_control < V_sat
+    }
+
+    state Saturation {
+        [*] --> FullyOn: V_control >= V_sat
+    }
+
+    classDef cutoffState fill:#f8d7da,stroke:#dc3545,stroke-width:2px
+    classDef activeState fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    classDef saturationState fill:#d4edda,stroke:#28a745,stroke-width:2px
+
+    class Cutoff cutoffState
+    class Active activeState
+    class Saturation saturationState

@@ -1,0 +1,15 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚀 Small Control Signal"] -->|Activates| B["🎯 Transistor Gate"]
+    B -->|Controls| C["🌊 Main Current Flow"]
+    C -->|Result| D["✅ Output Response"]
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef gate fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef flow fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef result fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B gate
+    class C flow
+    class D result

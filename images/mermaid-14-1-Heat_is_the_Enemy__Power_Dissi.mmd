@@ -1,0 +1,18 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🚀 Power Applied"] -->|Vce × Ic| B["📊 Calculate Heat"]
+    B -->|P = Vce × Ic| C{"🎯 Too Hot?"}
+    C -->|Yes| D["🚨 Transistor Dies"]
+    C -->|No| E["✅ Safe Operation"]
+    D --> F["💀 Catastrophic Failure"]
+    E --> G["🔄 Continue Working"]
+
+    classDef danger fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef safe fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef start fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef decision fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+
+    class A,G start
+    class C decision
+    class D,F danger
+    class E safe

@@ -1,0 +1,23 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    Start["🚀 Start: fib(5)"] --> Check1["📊 Check memo for 5"]
+    Check1 -->|Not Found| Compute1["🧠 Compute fib(4) + fib(3)"]
+    Compute1 --> Check2["📊 Check memo for 4"]
+    Check2 -->|Not Found| Compute2["🧠 Compute fib(3) + fib(2)"]
+    Compute2 --> Check3["📊 Check memo for 3"]
+    Check3 -->|Not Found| Compute3["🧠 Compute fib(2) + fib(1)"]
+    Compute3 --> Check4["📊 Check memo for 2"]
+    Check4 -->|Not Found| Compute4["🧠 Compute fib(1) + fib(0)"]
+    Compute4 --> Base["✅ Base cases: 1, 0"]
+    Base --> Store2["💾 Store: memo[2] = 1"]
+    Store2 --> Store3["💾 Store: memo[3] = 2"]
+    Store3 --> Store4["💾 Store: memo[4] = 3"]
+    Store4 --> Final["✅ Result: fib(5) = 5"]
+
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef data fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef processing fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+
+    class Start,Final success
+    class Check1,Check2,Check3,Check4,Store2,Store3,Store4 data
+    class Compute1,Compute2,Compute3,Compute4,Base processing

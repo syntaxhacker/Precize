@@ -1,0 +1,27 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["Start: Compare 'ABC' & 'AC'"] -->|Same char?| B["🎯 Match!"]
+    B --> C["Take it: +1 to length"]
+    B --> D["Skip it: Keep searching"]
+
+    A -->|Different chars| E["🚨 No Match"]
+    E --> F["Skip left char"]
+    E --> G["Skip right char"]
+
+    C --> H["Move both pointers"]
+    F --> H
+    G --> H
+
+    H --> I["Reached end?"]
+    I -->|Yes| J["✅ Result: LCS Length"]
+    I -->|No| A
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef match fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef nomatch fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef result fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B match
+    class E nomatch
+    class J result

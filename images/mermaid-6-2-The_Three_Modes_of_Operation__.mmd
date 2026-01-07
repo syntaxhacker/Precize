@@ -1,0 +1,12 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🔋 Power Source] -->|Wide open path| B[✅ Transistor in Saturation"]
+    B -->|Maximum current flows| C[💡 Light ON FULL]
+
+    classDef power fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef on fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef output fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+
+    class A power
+    class B on
+    class C output

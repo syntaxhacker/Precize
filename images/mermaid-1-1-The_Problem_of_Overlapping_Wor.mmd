@@ -1,0 +1,29 @@
+graph TD
+    subgraph "Naive Approach (Redundant Work)"
+        N5["5 cups (60)"] --> N4["4 cups (48)"]
+        N4 --> N3["3 cups (36)"]
+        N3 --> N2["2 cups (24)"]
+        N2 --> N1["1 cup (12)"]
+
+        N6["6 cups (72)"] --> N5_2["5 cups (60)"]
+        N5_2 --> N4_2["4 cups (48)"]
+        N4_2 --> N3_2["3 cups (36)"]
+        N3_2 --> N2_2["2 cups (24)"]
+        N2_2 --> N1_2["1 cup (12)"]
+
+        style N5 fill:#ffcccc,stroke:#cc0000
+        style N5_2 fill:#ffcccc,stroke:#cc0000
+        style N4 fill:#ffcccc,stroke:#cc0000
+        style N4_2 fill:#ffcccc,stroke:#cc0000
+    end
+
+    subgraph "Smart Approach (Memoized)"
+        SM5["5 cups (60)"] --> SM4["4 cups (48)"]
+        SM4 --> SM3["3 cups (36)"]
+        SM3 --> SM2["2 cups (24)"]
+        SM2 --> SM1["1 cup (12)"]
+
+        SM6["6 cups (72)"] -.->|Reuses 5 cups| SM5
+        style SM5 fill:#ccffcc,stroke:#00aa00
+        style SM6 fill:#ccffcc,stroke:#00aa00
+    end

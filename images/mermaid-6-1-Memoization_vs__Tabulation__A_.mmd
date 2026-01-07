@@ -1,0 +1,14 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🎯 Start: Need answer for F(5)"] --> B["🧠 Check: Is F(5) in cache?"]
+    B -->|"No"| C["🔍 Calculate F(5) recursively"]
+    C --> D["💾 Store F(5) = result in cache"]
+    D --> E["✅ Return result"]
+    B -->|"Yes"| F["📖 Read F(5) from cache"]
+    F --> E
+    style A fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    style B fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    style C fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    style D fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    style E fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    style F fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085

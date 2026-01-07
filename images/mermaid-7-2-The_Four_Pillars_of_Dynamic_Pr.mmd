@@ -1,0 +1,16 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🚀 Start State<br/>Position: Step 0<br/>Cost: 0"] -->|Move to| B["🔄 State 1<br/>Position: Step 1<br/>Cost: 5"]
+    B -->|Move to| C["🔄 State 2<br/>Position: Step 2<br/>Cost: 8"]
+    C -->|Move to| D["🔄 State 3<br/>Position: Step 3<br/>Cost: 12"]
+    D -->|Move to| E["✅ Final State<br/>Position: Step 100<br/>Cost: 450"]
+
+    classDef start fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef state fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef final fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A start
+    class B state
+    class C state
+    class D state
+    class E final

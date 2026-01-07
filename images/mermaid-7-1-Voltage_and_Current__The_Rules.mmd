@@ -1,0 +1,16 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["⚡ Voltage Applied"] -->|Less than 0.6V| B["🛑 Cutoff (OFF)"]
+    A -->|0.6V - 0.7V| C["🟡 Transition"]
+    A -->|0.7V - 0.8V| D["🟢 Active (ON)"]
+    A -->|0.8V and above| E["🔴 Saturation (MAX)"]
+
+    classDef danger fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef warning fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef success fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef critical fill:#721c24,stroke:#dc3545,stroke-width:2px,color:#f8d7da
+
+    class B danger
+    class C warning
+    class D success
+    class E critical

@@ -1,0 +1,35 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor':'#333', 'fontSize':'16px', 'nodeSpacing':'20px', 'rankSpacing':'20px', 'padding':'10px'}}}%%
+graph LR
+    subgraph "Header"
+        direction LR
+        H0["🚀 Start"] --> H1["🧠 DP"] --> H2["🎯 Target"] --> H3["✅ Path"]
+    end
+    subgraph "Vertical Guide"
+        direction TB
+        V0["📊"] --> V1["Row 1"] --> V2["Row 2"] --> V3["Row 3"]
+    end
+
+    %% Row 0 (Empty String)
+    C00["0"] --> C01["0"]
+    C01 --> C02["0"]
+    C02 --> C03["0"]
+
+    %% Row 1 (A)
+    C10["0"] --> C11["1"]
+    C11 --> C12["1"]
+    C12 --> C13["1"]
+
+    %% Row 2 (B)
+    C20["0"] --> C21["1"]
+    C21 --> C22["1"]
+    C22 --> C23["1"]
+
+    %% Row 3 (C)
+    C30["0"] --> C31["1"]
+    C31 --> C32["1"]
+    C32 --> C33["2"]
+
+    %% Styling for grid look
+    classDef cell fill:#ffffff,stroke:#333,stroke-width:1px,font-size:14px,width:40px,height:40px,margin:2px
+    class C00,C01,C02,C03,C10,C11,C12,C13,C20,C21,C22,C23,C30,C31,C32,C33 cell
+    class H0,H1,H2,H3,V0,V1,V2,V3 fill:none,stroke:none

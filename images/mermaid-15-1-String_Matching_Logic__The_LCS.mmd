@@ -1,0 +1,31 @@
+flowchart TD
+    %% Init directive with neutral theme
+    %%{init: {"theme": "neutral"}}%%
+
+    %% Node definitions with proper quoting for special characters
+    A(["🚀 Start at dp[i][j]"]) --> B{"🧠 Does text1[i-1] <br> match text2[j-1]?"}
+
+    %% Match branch
+    B -- "✅ Yes (Match)" --> C["🔄 Diagonal Move"]
+    C --> D(["📊 dp[i][j] = 1 + dp[i-1][j-1]"])
+
+    %% Mismatch branch
+    B -- "🚨 No (Mismatch)" --> E{"🎯 Which is larger?"}
+    E --> F(["📈 dp[i-1][j] (Top)"])
+    E --> G(["📈 dp[i][j-1] (Left)"])
+    F & G --> H(["📊 dp[i][j] = max(Top, Left)"])
+
+    %% Convergence
+    D --> I(["🔄 Next Cell"])
+    H --> I
+
+    %% Styling
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#01579b
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17
+    classDef process fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    classDef result fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c
+
+    class A,I startEnd
+    class B,E decision
+    class C,F,G,H process
+    class D result

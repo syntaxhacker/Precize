@@ -1,0 +1,18 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff', 'edgeLabelBackground':'#ffffff'}}}%%
+flowchart LR
+    A["🎵 Tiny Signal<br/>from Mic] -->|Enters| B[🎯 Base Pin"]
+    B -->|Controls| C["🔄 Transistor<br/>in Active Region"]
+    C -->|Amplifies| D["⚡ Large Signal<br/>from Power Supply"]
+    D -->|Creates| E["🔊 Loud Output<br/>at Collector"]
+
+    classDef input fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef control fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    classDef process fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef power fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef output fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+
+    class A input
+    class B control
+    class C process
+    class D power
+    class E output

@@ -1,0 +1,12 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    A["🔋 Power Source] -->|Blocked by| B[🚫 Transistor in Cutoff"]
+    B -->|No current flows| C[💡 Light OFF]
+
+    classDef power fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef off fill:#f8d7da,stroke:#dc3545,stroke-width:2px,color:#721c24
+    classDef output fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+
+    class A power
+    class B off
+    class C output

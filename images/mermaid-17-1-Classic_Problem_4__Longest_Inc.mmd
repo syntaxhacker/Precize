@@ -1,0 +1,18 @@
+%%{init: {'theme':'neutral', 'themeVariables': {'lineColor': '#ffffff'}}}%%
+flowchart LR
+    subgraph "Step-by-Step Trace"
+    A["Index 0: 10<br>Trail: [10]<br>LIS: 1"] --> B["Index 1: 22<br>Trail: [10, 22]<br>LIS: 2"]
+    B --> C["Index 2: 9<br>Trail: [9]<br>LIS: 1"]
+    C --> D["Index 3: 33<br>Trail: [10, 22, 33]<br>LIS: 3"]
+    D --> E["Index 4: 21<br>Trail: [10, 21]<br>LIS: 2"]
+    E --> F["Index 5: 50<br>Trail: [10, 22, 33, 50]<br>LIS: 4"]
+    F --> G["Index 6: 41<br>Trail: [10, 22, 33, 41]<br>LIS: 4"]
+    G --> H["Index 7: 60<br>Trail: [10, 22, 33, 41, 60]<br>LIS: 5"]
+    end
+
+    classDef start fill:#d4edda,stroke:#28a745,stroke-width:2px,color:#155724
+    classDef processing fill:#cce5ff,stroke:#0066cc,stroke-width:2px,color:#004085
+    classDef success fill:#fff3cd,stroke:#ffc107,stroke-width:2px,color:#856404
+    class A start
+    class B,C,D,E,F,G processing
+    class H success
