@@ -358,6 +358,10 @@ def build_generate_section_prompt_with_preferences(
 
 ---
 
+{context if context else ""}
+
+---
+
 {teaching_layers}
 
 ## CONTENT REQUIREMENTS
