@@ -730,3 +730,107 @@ Transition naturally between sections.
 
 Rewrite to address all issues. Respond ONLY with improved markdown.
 """
+
+
+def build_summary_prompt(
+    content: str,
+    title: str,
+    preferences: ContentPreferences | None = None,
+) -> str:
+    """Build prompt for generating section summary.
+
+    Args:
+        content: Section content to summarize
+        title: Section title
+        preferences: Optional content preferences for context
+
+    Returns:
+        Formatted prompt string
+    """
+    # Truncate content if too long (keep first 3000 chars for context)
+    content_preview = content[:3000] if len(content) > 3000 else content
+
+    preferences_hint = ""
+    if preferences:
+        if preferences.audience_level == "beginner":
+            preferences_hint = "\nFocus on key concepts and foundational understanding."
+        elif preferences.audience_level == "advanced":
+            preferences_hint = "\nFocus on technical details, patterns, and implementation insights."
+
+    return f"""Create a concise summary for this tutorial section.
+
+**Section**: {title}
+
+**Content Preview**:
+```
+{content_preview}
+```
+{preferences_hint}
+
+**Requirements**:
+1. Generate exactly 3-5 bullet points
+2. Each bullet should start with "- "
+3. Focus on the MOST important concepts covered
+4. Keep each bullet point concise (max 20 words)
+5. Capture the "what" and "why" (not just "how")
+6. Think ahead: What should the NEXT section know about this one?
+
+**Format**:
+Respond ONLY with the bullet points, no preamble or explanation.
+
+Example output:
+- Explained how React components manage state internally
+- Introduced useState hook for functional components
+- Covered the difference between props and state
+- Demonstrated state updates trigger re-renders
+- Showed common state management pitfalls
+
+Create the summary now:
+"""
+
+
+def build_enhanced_context(
+    tasks: list,
+    current_index: int,
+    recent_content: str,
+    num_summaries: int = 3,
+) -> str:
+    """Build enhanced context from summaries + recent content.
+
+    Args:
+        tasks: List of all tasks (BlockTask objects)
+        current_index: Index of current task being generated
+        recent_content: Last N characters of immediate previous content
+        num_summaries: Number of previous summaries to include (default: 3)
+
+    Returns:
+        Formatted context string with summaries + content
+    """
+    from preciz.agents.teaching import BlockTask
+
+    sections = []
+
+    # Add section summaries from previous tasks
+    if current_index > 0:
+        start_index = max(0, current_index - num_summaries)
+        previous_tasks = tasks[start_index:current_index]
+        tasks_with_summaries = [t for t in previous_tasks if t.summary]
+
+        if tasks_with_summaries:
+            sections.append("**Previous Section Summaries**:")
+            sections.append("")
+
+            for task in tasks_with_summaries:
+                sections.append(f"### {task.title}")
+                sections.append(task.summary)
+                sections.append("")
+
+    # Add immediate previous content for continuity
+    if recent_content:
+        sections.append("**Immediate Previous Content** (for continuity):")
+        sections.append("```")
+        sections.append(recent_content[-500:] if len(recent_content) > 500 else recent_content)
+        sections.append("```")
+        sections.append("")
+
+    return "\n".join(sections)

@@ -540,6 +540,16 @@ def main() -> int:
                 # Track LLM calls for content generation
                 section_start_time = time.time()
 
+                # Build the prompt for logging
+                from preciz.prompts.teaching.orchestrator import build_generate_section_prompt_with_preferences
+                generation_prompt = build_generate_section_prompt_with_preferences(
+                    topic=topic,
+                    section_title=task.title,
+                    description=task.description,
+                    context=context,
+                    preferences=preferences,
+                )
+
                 # Generate with preferences
                 content = orchestrator.generate_tool.generate_with_preferences(
                     topic=topic,
@@ -551,9 +561,9 @@ def main() -> int:
 
                 section_time = time.time() - section_start_time
 
-                # Log generation LLM call
+                # Log generation LLM call with full prompt
                 logger.log_llm_request(
-                    prompt=f"Generate section: {task.title}",
+                    prompt=generation_prompt,
                     response=content[:500] + "..." if len(content) > 500 else content,
                     model=config.model,
                     temperature=0.7,
@@ -567,6 +577,11 @@ def main() -> int:
                 # Review with preferences
                 for iteration in range(max_iterations):
                     logger.info(f"  → Review {iteration + 1}/{max_iterations}")
+
+                    # Build review prompt for logging
+                    from preciz.prompts.teaching.orchestrator import build_review_prompt_with_preferences
+                    review_prompt = build_review_prompt_with_preferences(content, task.title, preferences)
+
                     feedback = orchestrator.review_tool.review_with_preferences(
                         content, task.title, preferences
                     )
@@ -583,20 +598,62 @@ def main() -> int:
                         else:
                             logger.info(f"    ⚠ {len(issues)} issue(s)")
 
-                        # Log improvement
+                        # Build improve prompt for logging
+                        from preciz.prompts.teaching.orchestrator import build_improve_prompt_with_preferences
+                        issues_list = feedback.get("issues", [])
+                        suggestions_list = feedback.get("suggestions", [])
+                        improve_prompt = build_improve_prompt_with_preferences(
+                            content, issues_list, suggestions_list, preferences
+                        )
+
+                        # Log improvement with full prompt
+                        improve_start_time = time.time()
                         improved = orchestrator.improve_tool.improve_with_preferences(
                             content, task.title, feedback, preferences
                         )
+                        improve_time = time.time() - improve_start_time
+
                         logger.log_llm_request(
-                            prompt=f"Improve section: {task.title}",
-                            response="Content improved based on feedback",
+                            prompt=improve_prompt,
+                            response=improved[:500] + "..." if len(improved) > 500 else improved,
                             model=config.model,
                             temperature=0.5,
                             max_tokens=3000,
-                            response_time_seconds=0.0,
+                            response_time_seconds=improve_time,
                             success=True,
                         )
                         content = improved
+
+                # Generate summary after content is approved
+                logger.info(f"  → Generating summary...")
+                try:
+                    # Build summary prompt for logging
+                    from preciz.prompts.teaching.orchestrator import build_summary_prompt
+                    summary_prompt_for_log = build_summary_prompt(content, task.title, preferences)
+
+                    summary_start_time = time.time()
+                    summary = orchestrator.summary_tool.generate_summary(
+                        content=content,
+                        title=task.title,
+                        preferences=preferences,
+                    )
+                    summary_time = time.time() - summary_start_time
+
+                    task.summary = summary
+
+                    logger.log_llm_request(
+                        prompt=summary_prompt_for_log,
+                        response=summary,
+                        model=config.model,
+                        temperature=0.3,
+                        max_tokens=500,
+                        response_time_seconds=summary_time,
+                        success=True,
+                    )
+                    logger.info(f"    ✓ Summary generated")
+                except Exception as e:
+                    logger.warning(f"    ⚠ Summary generation failed: {e}")
+                    task.summary = ""
 
                 # Verify and convert Mermaid diagrams to PNG
                 if preferences.include_diagrams:
@@ -613,7 +670,24 @@ def main() -> int:
                 # Append
                 total_lines = append_tool.append(content)
                 task.completed = True
-                context = content[-500:] if len(content) > 500 else content
+
+                # Build enhanced context for next section
+                # Combine last 3 summaries + last 500 chars of content
+                context_parts = []
+
+                # Add last 3 section summaries
+                num_summaries = 3
+                start_idx = max(0, i + 1 - num_summaries)
+                for j in range(start_idx, i + 1):
+                    if tasks[j].summary:
+                        context_parts.append(f"### {tasks[j].title}\n{tasks[j].summary}\n")
+
+                # Add immediate previous content
+                recent_content = content[-500:] if len(content) > 500 else content
+                context_parts.append(f"**Immediate Previous Content**:\n```\n{recent_content}\n```")
+
+                context = "\n".join(context_parts)
+
                 logger.info(f"  → Appended (total: {total_lines} lines)")
                 logger.info("")
 

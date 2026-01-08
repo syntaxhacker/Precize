@@ -313,6 +313,40 @@ class ImproveTool:
         return response.content
 
 
+class SummaryTool:
+    """Tool to generate section summaries."""
+
+    def __init__(self, llm: LLMClient):
+        self.llm = llm
+
+    def generate_summary(
+        self,
+        content: str,
+        title: str,
+        preferences: ContentPreferences | None = None,
+    ) -> str:
+        """
+        Generate a 3-5 bullet point summary of section content.
+
+        Args:
+            content: Section content to summarize
+            title: Section title
+            preferences: Optional content preferences for context-aware summarization
+
+        Returns:
+            Summary as bullet points (each starting with "- ")
+        """
+        prompt = orch_prompts.build_summary_prompt(content, title, preferences)
+
+        messages = [
+            Message(role="system", content="You are an expert technical writer creating educational content summaries."),
+            Message(role="user", content=prompt),
+        ]
+
+        response = self.llm.complete(messages, temperature=0.3, max_tokens=500)
+        return response.content
+
+
 # ========== ORCHESTRATOR ==========
 
 @dataclass
@@ -327,6 +361,7 @@ class BlockTask:
     require_examples: bool = True
     completed: bool = False
     content: str = ""
+    summary: str = ""  # LLM-generated section summary (3-5 bullet points)
 
 
 @dataclass
@@ -359,6 +394,7 @@ class OrchestrationState:
                     "require_table": t.require_table,
                     "require_examples": t.require_examples,
                     "completed": t.completed,
+                    "summary": t.summary,
                 }
                 for t in self.tasks
             ],
@@ -387,6 +423,7 @@ class OrchestrationState:
                     require_table=t.get("require_table", False),
                     require_examples=t.get("require_examples", True),
                     completed=t["completed"],
+                    summary=t.get("summary", ""),  # Load with fallback for old state files
                 )
             )
         return state
@@ -411,6 +448,7 @@ class DocumentOrchestrator:
         self.generate_tool = GenerateTool(self.llm)
         self.review_tool = ReviewTool(self.llm)
         self.improve_tool = ImproveTool(self.llm)
+        self.summary_tool = SummaryTool(self.llm)
 
     def create_todo_list(self, topic: str, target_lines: int = 10000) -> list[BlockTask]:
         """

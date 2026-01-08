@@ -17,62 +17,25 @@ def detect_incomplete_sections(content: str) -> list[dict]:
     issues = []
     lines = content.split('\n')
 
-    # Check for incomplete mermaid code blocks
-    in_mermaid = False
-    mermaid_start = 0
-    mermaid_lines = []
-
-    for i, line in enumerate(lines, 1):
-        # Check for mermaid block start
-        if line.strip() == '```mermaid':
-            in_mermaid = True
-            mermaid_start = i
-            mermaid_lines = [line]
-            continue
-
-        # Inside mermaid block
-        if in_mermaid:
-            mermaid_lines.append(line)
-            if line.strip() == '```' and line.strip() != '```mermaid':
-                # Block closed - validate it
-                mermaid_content = '\n'.join(mermaid_lines)
-
-                # Check for common incomplete patterns
-                if _is_incomplete_mermaid(mermaid_content):
-                    issues.append({
-                        'type': 'incomplete_mermaid',
-                        'line': mermaid_start,
-                        'end_line': i,
-                        'context': _get_context(lines, mermaid_start, i),
-                        'content': mermaid_content
-                    })
-
-                in_mermaid = False
-                mermaid_lines = []
-            elif i - mermaid_start > 50:  # Suspiciously long mermaid
-                issues.append({
-                    'type': 'suspiciously_long_mermaid',
-                    'line': mermaid_start,
-                    'end_line': i,
-                    'context': _get_context(lines, mermaid_start, i),
-                    'content': '\n'.join(mermaid_lines[-10:])
-                })
-                in_mermaid = False
-
-    # Check for incomplete code blocks
+    # Check for unclosed code blocks (any language)
     in_code = False
     code_start = 0
     code_lang = ''
 
     for i, line in enumerate(lines, 1):
-        if line.startswith('```'):
+        stripped = line.strip()
+
+        # Check for code fence
+        if stripped.startswith('```'):
             if not in_code:
+                # Opening code fence
                 in_code = True
                 code_start = i
-                code_lang = line[3:].strip()
-            elif line.strip() != '```' + code_lang:
-                # Code block closed
+                code_lang = stripped[3:].strip()
+            elif stripped == '```':
+                # Closing code fence (just ```, not ```language)
                 in_code = False
+                code_lang = ''
 
     # Check if file ends with open code block
     if in_code:
@@ -83,59 +46,44 @@ def detect_incomplete_sections(content: str) -> list[dict]:
             'context': _get_context(lines, code_start, len(lines))
         })
 
-    # Check for sections ending mid-sentence
-    for i in range(len(lines) - 1):
-        # If a section header is followed by incomplete content
-        if lines[i].startswith('##') and i + 1 < len(lines):
-            # Check if next 20 lines look incomplete
-            next_section = i + 1
-            for j in range(i + 1, min(i + 20, len(lines))):
-                if lines[j].startswith('##'):
-                    next_section = j
-                    break
+    # Check for incomplete mermaid blocks (these get converted to images)
+    # But if any remain, they're problematic
+    in_mermaid = False
+    mermaid_start = 0
 
-            section_content = '\n'.join(lines[i+1:next_section])
-            if _is_incomplete_section(section_content):
+    for i, line in enumerate(lines, 1):
+        if line.strip() == '```mermaid':
+            in_mermaid = True
+            mermaid_start = i
+        elif line.strip() == '```' and in_mermaid:
+            in_mermaid = False
+
+    if in_mermaid:
+        issues.append({
+            'type': 'unclosed_mermaid_block',
+            'line': mermaid_start,
+            'context': _get_context(lines, mermaid_start, len(lines))
+        })
+
+    # Check for obvious truncation at end of file
+    # If the document ends mid-sentence or mid-word
+    if len(lines) > 10:
+        last_10 = [l for l in lines[-10:] if l.strip() and not l.strip().startswith('#')]
+        if last_10:
+            last_content_line = last_10[-1].strip()
+            # If last line ends without punctuation and is substantial
+            if (len(last_content_line) > 30 and
+                not last_content_line.endswith(('.', '!', '?', '}', ')', ']', ':', '"', "'", '])', '*)')) and
+                not last_content_line.startswith('|') and
+                not last_content_line.startswith('!') and
+                '```' not in last_content_line):
                 issues.append({
-                    'type': 'incomplete_section',
-                    'line': i,
-                    'section_title': lines[i].strip(),
-                    'context': _get_context(lines, i, next_section)
+                    'type': 'possible_truncation',
+                    'line': len(lines),
+                    'context': _get_context(lines, len(lines) - 5, len(lines))
                 })
 
     return issues
-
-
-def _is_incomplete_mermaid(content: str) -> bool:
-    """Check if mermaid block is incomplete."""
-    # Check for unclosed branches
-    if '-->' in content and not any(br in content for br in ['-->|', '--->']):
-        # Has edges but may be incomplete
-        lines = content.split('\n')
-
-        # Check if ends abruptly
-        for line in lines[-5:]:
-            if line.strip() and not line.strip().startswith('```'):
-                # Last non-empty line before closing
-                if any(char in line for char in ['-->|', '-->', '[(', '])']):
-                    # Ends with an edge or node definition
-                    if '```' not in line:
-                        return True
-
-    return False
-
-
-def _is_incomplete_section(content: str) -> bool:
-    """Check if section content looks incomplete."""
-    if not content or len(content.strip()) < 100:
-        return True
-
-    # Ends with incomplete list/item
-    lines = content.strip().split('\n')
-    if lines and lines[-1].strip().startswith('-') and len(lines[-1]) < 20:
-        return True
-
-    return False
 
 
 def _get_context(lines: list[str], start: int, end: int) -> str:
@@ -151,7 +99,7 @@ def print_incomplete_report(issues: list[dict]):
         print("✅ No incomplete sections detected!")
         return
 
-    print(f"\n⚠️  Found {len(issues)} incomplete section(s):\n")
+    print(f"\n⚠️  Found {len(issues)} issue(s):\n")
 
     for i, issue in enumerate(issues, 1):
         print(f"[{i}] {issue['type'].replace('_', ' ').title()}")
