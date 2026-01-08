@@ -582,8 +582,23 @@ def main() -> int:
                     from preciz.prompts.teaching.orchestrator import build_review_prompt_with_preferences
                     review_prompt = build_review_prompt_with_preferences(content, task.title, preferences)
 
+                    # Log review request with full prompt
+                    review_start_time = time.time()
                     feedback = orchestrator.review_tool.review_with_preferences(
                         content, task.title, preferences
+                    )
+                    review_time = time.time() - review_start_time
+
+                    # Log the review LLM call
+                    feedback_json = str(feedback) if feedback else "{}"
+                    logger.log_llm_request(
+                        prompt=review_prompt,
+                        response=feedback_json,
+                        model=config.model,
+                        temperature=0.5,
+                        max_tokens=3000,
+                        response_time_seconds=review_time,
+                        success=True,
                     )
 
                     if feedback.get("passed", True):
